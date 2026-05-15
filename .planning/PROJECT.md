@@ -42,9 +42,9 @@ Turn a camera roll into a film — the single "wow" moment when a user sees thei
 
 ## Context
 
-- **Builder:** Shahad -- CS student graduating August 2025; building Trailfilm as both a portfolio cornerstone and a potential real product
+- **Builder:** Shahad -- CS student; building Trailfilm as both a portfolio cornerstone and a potential real product
 - **Target users:** Indian urban travelers, 22-35, mobile-first, active on Instagram and WhatsApp; secondary: couples (honeymoon/anniversary), travel content creators
-- **Market:** India domestic travel boom post-COVID; cultural affinity for emotional storytelling; high social sharing behavior makes every output a viral acquisition loop
+- **Market:** India domestic travel boom; cultural affinity for emotional storytelling; high social sharing behavior makes every output a viral acquisition loop
 - **Design north star:** Luxury cinematic product, not SaaS. Feels like opening a Moleskine in a candlelit room. Reference: Linear, Apple product pages, Aman Resorts website
 - **Visual system:** Deep black (#0A0A0A) canvas, parchment off-white (#FAFAF7) text, single amber accent (#E5A663). Typography: Fraunces (serif, editorial headlines) + Inter (sans, UI). Motion: slow, weighted, cubic-bezier(0.22, 1, 0.36, 1), 600-1200ms durations
 - **Prior exploration:** Four detailed ideation documents created -- Product Vision, MVP Build Guide, Design & Brand Identity, Execution Playbook. All technical and design decisions are pre-researched.
@@ -54,7 +54,7 @@ Turn a camera roll into a film — the single "wow" moment when a user sees thei
 - **Tech Stack (decided):** Next.js 14 App Router + TypeScript + Tailwind CSS + shadcn/ui + Framer Motion + Mapbox GL JS + Supabase (Postgres + Auth + Storage) + Gemini 1.5 Flash + Vercel deployment
 - **Budget:** Free-tier only at MVP scale -- Supabase (500MB DB, 1GB storage), Gemini (1500 RPD), Mapbox (50k loads/month), Vercel hobby tier
 - **Network:** Design for 4G and prepaid Indian mobile connections -- client-side image compression mandatory before upload (target: <1.5MB per photo)
-- **Timeline:** ~85 hours total; ~4 weeks at 3hrs/weekday + weekends; targeting portfolio-ready before August 2025 job search
+- **Timeline:** ~Under 10-11 hours, Need to share working model ASAP
 - **Photo cap:** Max 12 photos per trip for MVP (Vercel function size and Gemini payload limits)
 - **AI output:** Story quality is the product -- prompt engineering in lib/gemini/prompts.ts is the highest-leverage file in the codebase
 
@@ -63,12 +63,26 @@ Turn a camera roll into a film — the single "wow" moment when a user sees thei
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Next.js 14 App Router | Built-in API routes, RSC reduces client JS, Vercel native deployment | -- Pending |
-| Supabase over Firebase | Postgres + Auth + Storage in one place, RLS for security | -- Pending |
+| Supabase | Postgres + Auth + Storage in one place, RLS for security | -- Pending |
 | Gemini 1.5 Flash over OpenAI | Free tier better for image-heavy multimodal use case | -- Pending |
 | Magic link auth only | Reduces friction; fits cinematic brand restraint | -- Pending |
 | No video export in MVP | Scope control; FFmpeg complexity deferred to Phase 2 | -- Pending |
 | Mapbox over Google Maps | Cinematic dark style; smooth flyTo; 50k free loads/month | -- Pending |
 | Client-side EXIF + compression | Saves storage costs; faster on slow connections | -- Pending |
+
+## Current Milestone: v1.0 Trailfilm MVP
+
+**Goal:** Ship a working web app that transforms travel photos into a cinematic, AI-narrated story — from upload to shareable public URL.
+
+**Target features:**
+- Magic link auth (sign up + log in, no password)
+- Trip creation (name + optional destination)
+- Photo upload (drag-and-drop, batch, EXIF auto-read, client-side compression)
+- AI story generation via Gemini 1.5 Flash (3-6 chapters, 4 tone options)
+- Cinematic scroll-driven story viewer (photo parallax + animated narrative)
+- Animated Mapbox map tracing the trip journey between chapter locations
+- Trip dashboard (view and manage all trips)
+- Public trip sharing (toggle + unique shareable URL)
 
 ## Evolution
 
@@ -88,4 +102,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-15 after initialization*
+*Last updated: 2026-05-15 — Milestone v1.0 started*
