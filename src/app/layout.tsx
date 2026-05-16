@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Fraunces, Inter } from 'next/font/google'
 import './globals.css'
+import { ToasterProvider } from '@/components/providers/ToasterProvider'
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -29,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${fraunces.variable} ${inter.variable}`}>
+        <ToasterProvider />
         {children}
       </body>
     </html>
