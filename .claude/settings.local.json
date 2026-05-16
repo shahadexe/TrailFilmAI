@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\shaha\\\\Downloads\\\\Workplace\\\\FSApp\" -Force)",
+      "Bash(Select-Object -Property Name, PSIsContainer)",
+      "Skill(gsd-progress)",
+      "Skill(gsd-progress:*)"
+    ]
+  }
+}

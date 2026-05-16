@@ -67,6 +67,7 @@ Resume: After user approves, proceed to Plan 02 (database + Supabase clients)
 | Inline error state on auth failure (D-04) | Same calm-no-navigate principle; consistent with confirmation UX |
 | Minimal marketing placeholder in Phase 1 (D-05) | Full landing page deferred; avoids scope creep |
 | shadcn@2.6.0 instead of latest (D-06) | shadcn@4.7.0 defaults to base-nova/neutral; 2.6.0 correctly installs Default/Slate style per Build Guide §6.3 |
+| Google OAuth alongside magic link (D-07) | Added per user request — reduces friction for Indian users; dark-branded button fits canvas; same /auth/callback handles both; Plan 02 Task 1 + Plan 04 Task 3 updated |
 
 ## Blockers
 

@@ -63,7 +63,7 @@ Turn a camera roll into a film — the single "wow" moment when a user sees thei
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Next.js 14 App Router | Built-in API routes, RSC reduces client JS, Vercel native deployment | -- Pending |
-| Supabase | Postgres + Auth + Storage in one place, RLS for security | -- Pending |
+| Supabase  | Postgres + Auth + Storage in one place, RLS for security | -- Pending |
 | Gemini 1.5 Flash over OpenAI | Free tier better for image-heavy multimodal use case | -- Pending |
 | Magic link auth only | Reduces friction; fits cinematic brand restraint | -- Pending |
 | No video export in MVP | Scope control; FFmpeg complexity deferred to Phase 2 | -- Pending |
