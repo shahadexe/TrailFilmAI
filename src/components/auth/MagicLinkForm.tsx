@@ -36,6 +36,7 @@ export const MagicLinkForm = () => {
         },
       })
       if (error) {
+        console.error('[MagicLinkForm] signInWithOtp error:', error.message)
         setState('error')
         return
       }
@@ -51,13 +52,16 @@ export const MagicLinkForm = () => {
     setResending(true)
     try {
       const supabase = createClient()
-      await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
           shouldCreateUser: true,
         },
       })
+      if (error) {
+        toast.error('Resend failed. Please try again.')
+      }
     } catch {
       toast.error('Something went wrong. Try again.')
     } finally {

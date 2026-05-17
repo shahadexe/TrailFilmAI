@@ -12,7 +12,7 @@ export default async function DashboardPage() {
         <h1 className="font-serif text-[28px] font-medium tracking-[0.06em] text-ink-50 md:text-[40px]">
           Welcome.
         </h1>
-        <p className="font-sans text-base text-[#E8E6DF]">Signed in as {user?.email}</p>
+        <p className="font-sans text-base text-[#E8E6DF]">Signed in as {user!.email}</p>
         <p className="font-sans text-sm text-[#B5B2A8]">Phase 2 will build the trip list here.</p>
       </div>
     </main>

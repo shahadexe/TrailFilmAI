@@ -28,6 +28,8 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
+  // Keep in sync with src/app/(app)/ route group — any new (app) route prefix must be added here.
+  // The (app)/layout.tsx server guard provides defense-in-depth for missed prefixes.
   const isProtected =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/new') ||
