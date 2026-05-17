@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { TripCardGrid } from '@/components/trip/TripCardGrid'
 import { EmptyState } from '@/components/trip/EmptyState'
@@ -8,12 +9,15 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  // (app)/layout.tsx already redirects unauthenticated users — this is defense-in-depth and gives us user.id
+  // (app)/layout.tsx already redirects unauthenticated users — this is defense-in-depth.
+  // Explicit null check handles the narrow window where the session expires between layout
+  // and page auth calls (token refresh timing, clock skew).
+  if (!user) redirect('/login')
 
   const { data: rows } = await supabase
     .from('trips')
     .select('*, cover:photos!cover_photo_id(id, storage_path)')
-    .eq('user_id', user!.id)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   const trips = (rows ?? []).map(
