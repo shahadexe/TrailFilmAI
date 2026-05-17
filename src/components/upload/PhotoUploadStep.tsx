@@ -64,9 +64,9 @@ export function PhotoUploadStep({ tripId, userId }: PhotoUploadStepProps) {
 
   const onRetry = useCallback(
     (id: string) => {
-      retryOne(id)
+      retryOne(id, items)
     },
-    [retryOne]
+    [retryOne, items]
   )
 
   // Revoke all object URLs on unmount

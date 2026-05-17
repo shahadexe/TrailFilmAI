@@ -138,23 +138,24 @@ export function useUploadPipeline({
   )
 
   const retryOne = useCallback(
-    async (itemId: string) => {
-      let snapshot: PhotoItem | undefined
+    async (itemId: string, currentItems: PhotoItem[]) => {
+      // CR-03: Read current item state from caller-supplied snapshot — no side-effects in updater
+      // WR-05: Compute actual order_index from caller's items array
+      const snapshot = currentItems.find((p) => p.id === itemId)
+      if (!snapshot || snapshot.retryCount >= 1) return
 
-      setItems((prev) => {
-        snapshot = prev.find((p) => p.id === itemId)
-        if (!snapshot || snapshot.retryCount >= 1) return prev
-        return prev.map((p) =>
+      const orderIndex = currentItems.indexOf(snapshot)
+
+      // Pure state update — no reads inside the updater
+      setItems((prev) =>
+        prev.map((p) =>
           p.id === itemId
             ? { ...p, retryCount: 1, state: 'queued', progress: 0, errorMessage: undefined }
             : p
         )
-      })
+      )
 
-      // Guard: only retry if retryCount was 0
-      if (!snapshot || snapshot.retryCount >= 1) return
-
-      const res = await uploadOne(itemId, snapshot.file, snapshot.exif, 0)
+      const res = await uploadOne(itemId, snapshot.file, snapshot.exif, orderIndex >= 0 ? orderIndex : 0)
 
       if ('photoId' in res) {
         setItems((prev) =>
