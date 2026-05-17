@@ -43,7 +43,9 @@ export async function deleteTrip(
       .remove(photos.map((p) => p.storage_path))
 
     if (storageError) {
-      console.error('Storage delete error:', storageError)
+      // Non-throwing by design: storage orphans are preferable to DB orphans.
+      // Log with path list so the failure is actionable (e.g. manual cleanup).
+      console.error('[deleteTrip] Failed to remove storage files:', photos.map((p) => p.storage_path), storageError)
     }
   }
 
