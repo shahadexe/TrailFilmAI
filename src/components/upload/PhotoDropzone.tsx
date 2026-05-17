@@ -3,6 +3,10 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { Upload } from 'lucide-react'
 
+// Client-side MIME filter — reduces UX friction by rejecting obviously wrong file types early.
+// Server-side enforcement is via Supabase bucket MIME restriction policy (Phase 1).
+// File.type is extension-derived on most platforms and can be spoofed; the bucket
+// rejects non-image content regardless of what the browser reports.
 const ACCEPTED_MIMES = ['image/jpeg', 'image/png', 'image/webp'] as const
 const MAX_PHOTOS = 12
 
