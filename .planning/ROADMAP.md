@@ -9,7 +9,7 @@
 | # | Phase | Goal | Requirements | Criteria |
 |---|-------|------|--------------|----------|
 | 1 | Foundation & Auth | Project is scaffolded and users can authenticate via magic link | AUTH-01, AUTH-02, AUTH-03 | 4 |
-| 2 | Trip Management & Photo Upload | 3/4 | In Progress|  |
+| 2 | Trip Management & Photo Upload | 4/6 | In Progress|  |
 | 3 | AI Story Generation | App transforms uploaded photos into a structured, tone-driven narrative | STORY-01, STORY-02, STORY-03 | 4 |
 | 4 | Cinematic Viewer | Users experience their trip as a cinematic, scroll-driven story with map | VIEW-01, VIEW-02, VIEW-03 | 4 |
 | 5 | Sharing & Deploy | Trips are shareable via public URL and the app is live on Vercel | SHARE-01, SHARE-02 | 3 |
@@ -59,6 +59,21 @@ Plans:
 3. After upload, each photo's GPS coordinates and capture timestamp are visible in the trip detail view (extracted from EXIF without any user input).
 4. Each uploaded photo arrives in Supabase Storage at or under 1.5 MB regardless of original file size.
 5. A user deletes a trip from the dashboard — it disappears along with all its photos.
+
+**Plans:** 6 plans
+
+Plans:
+**Wave 1**
+- [x] 02-01-PLAN.md — Utilities: EXIF extraction, client-side compression, trip mutations
+- [x] 02-02-PLAN.md — Trip dashboard: card grid, AppNav, empty state
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 02-03-PLAN.md — Trip creation wizard (Step 1): TripDetailsForm, Zustand store, /new route
+
+**Wave 3** *(blocked on Wave 3 completion)*
+- [x] 02-04-PLAN.md — Photo upload pipeline (Step 2): dropzone, state machine, parallel upload, auto-redirect
+- [ ] 02-05-PLAN.md — Trip detail page: photo grid with EXIF badges
+- [ ] 02-06-PLAN.md — Trip deletion with storage cleanup
 
 ---
 
@@ -111,7 +126,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 4/4 | Complete | 2026-05-17 |
-| 2. Trip Management & Photo Upload | 0/? | Not started | — |
+| 2. Trip Management & Photo Upload | 4/6 | In Progress | — |
 | 3. AI Story Generation | 0/? | Not started | — |
 | 4. Cinematic Viewer | 0/? | Not started | — |
 | 5. Sharing & Deploy | 0/? | Not started | — |
