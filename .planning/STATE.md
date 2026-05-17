@@ -3,23 +3,42 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Trailfilm MVP
 status: executing
-last_updated: "2026-05-17T00:00:00.000Z"
+last_updated: "2026-05-17T20:47:32.784Z"
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 4
-  completed_plans: 0
-  percent: 5
+  completed_phases: 1
+  total_plans: 8
+  completed_plans: 7
+  percent: 88
 ---
 
 ## Current Position
 
-Phase: 1 — Foundation & Auth
-Plan: 01 — Scaffold + Brand Tailwind + shadcn/ui (CHECKPOINT — awaiting human verification)
-Status: Task 3 checkpoint reached — awaiting user verification of scaffold
-Resume: After user approves, proceed to Plan 02 (database + Supabase clients)
+Phase: 2 — Trip Management & Photo Upload
+Status: Ready to execute. 4 plans in 3 waves.
+Resume file: None
 
 ## Session Log
+
+### 2026-05-17 (continued)
+
+**`/gsd-ui-phase 2`** — Created and verified UI design contract for Phase 2 (2 revision cycles):
+
+- Typography: 4 roles — Heading 40px (Fraunces 500), Body 16px, Label/Small 14px, Caption/Micro 12px (new for EXIF badges/upload counter); Display excluded (not used in Phase 2 surfaces)
+- Color: #0A0A0A canvas / #161616 elevated / #E5A663 amber (per-view reserved lists: 2–4 elements max); #D67867 destructive; no new tokens
+- Spacing: 8pt scale; 12px exception declared (carries forward Brand Doc §11 Form Inputs); all spacing values multiples of 4
+- Components added: skeleton, dialog, progress (shadcn official, via `shadcn@2.6.0 add`)
+- Copy: 26 copy elements defined; step indicator "Step 1 of 2" (restrained, no visual chrome); EXIF badges hover-reveal gradient; GPS pill amber; three-dot menu `aria-label="Trip options"`
+- 6/6 checker dimensions passed (2 non-blocking FLAGs: "Continue" CTA intentional brand restraint; 12/14/16 type cluster functionally distinct)
+- Output: `.planning/phases/02-trip-management-photo-upload/02-UI-SPEC.md`
+
+**`/gsd-discuss-phase 2`** — Captured implementation decisions for Phase 2:
+
+- Trip creation: multi-step wizard at `/new` (Step 1: name + destination → Step 2: photo upload); trip created in DB at Step 1 submission; animated transitions (Framer Motion AnimatePresence)
+- Dashboard: card grid (2–3 cols desktop), cover photo + Fraunces name + Inter destination; empty state with inline SVG illustration (Claude designs) + amber CTA
+- Post-upload: redirect to `/trip/[id]`; Phase 2 detail view = photo grid with EXIF metadata badges; per-photo progress rings + "Uploading X/12" counter
+- Upload failures: save successes, surface failures with 1-manual-retry + Remove option; auto-proceed when all terminal
+- Output: `.planning/phases/02-trip-management-photo-upload/02-CONTEXT.md`
 
 ### 2026-05-16
 
@@ -79,8 +98,10 @@ None.
 - [x] `/gsd-ui-phase 1` — create and verify UI design contract
 - [x] `/gsd-plan-phase 1` — create 4-wave execution plan for Foundation & Auth
 - [ ] `/gsd-execute-phase 1` — execute plans (Wave 1 → 2 → 3 → 4)
-  - [x] Plan 01 (Wave 1): scaffold + brand Tailwind + shadcn/ui — CHECKPOINT awaiting verification
-  - [ ] Plan 02 (Wave 2): DB schema + Supabase clients
+  - [x] Plan 01 (Wave 1): scaffold + brand Tailwind + shadcn/ui — complete (human verified)
+  - [x] Plan 02 (Wave 2): DB schema + Supabase clients — complete
+  - [x] Plan 03 (Wave 3): middleware + auth callback + layout guard + marketing placeholder — complete (human verified)
+  - [x] Plan 04 (Wave 4): /login + /signup + MagicLinkForm + GoogleAuthButton — complete (e2e smoke test approved)
   - [ ] Plan 03 (Wave 3): middleware + auth callback + layout guard + marketing placeholder
   - [ ] Plan 04 (Wave 4): /login + /signup + MagicLinkForm
 

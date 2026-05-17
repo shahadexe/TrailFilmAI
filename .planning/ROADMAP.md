@@ -9,7 +9,7 @@
 | # | Phase | Goal | Requirements | Criteria |
 |---|-------|------|--------------|----------|
 | 1 | Foundation & Auth | Project is scaffolded and users can authenticate via magic link | AUTH-01, AUTH-02, AUTH-03 | 4 |
-| 2 | Trip Management & Photo Upload | Users can create trips and upload photos with EXIF extraction | TRIP-01, TRIP-02, TRIP-03, UPLOAD-01, UPLOAD-02, UPLOAD-03 | 5 |
+| 2 | Trip Management & Photo Upload | 3/4 | In Progress|  |
 | 3 | AI Story Generation | App transforms uploaded photos into a structured, tone-driven narrative | STORY-01, STORY-02, STORY-03 | 4 |
 | 4 | Cinematic Viewer | Users experience their trip as a cinematic, scroll-driven story with map | VIEW-01, VIEW-02, VIEW-03 | 4 |
 | 5 | Sharing & Deploy | Trips are shareable via public URL and the app is live on Vercel | SHARE-01, SHARE-02 | 3 |
@@ -33,16 +33,16 @@
 
 Plans:
 **Wave 1**
-- [x] 01-01-PLAN.md — Scaffold Next.js 14 + Tailwind brand theme + shadcn/ui design system (checkpoint: awaiting human verify)
+- [x] 01-01-PLAN.md — Scaffold Next.js 14 + Tailwind brand theme + shadcn/ui design system
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 01-02-PLAN.md — Apply Supabase DB schema, storage bucket, and create browser/server clients
+- [x] 01-02-PLAN.md — Apply Supabase DB schema, storage bucket, and create browser/server clients
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 01-03-PLAN.md — Middleware, auth callback, (app) layout guard, and marketing placeholder
+- [x] 01-03-PLAN.md — Middleware, auth callback, (app) layout guard, and marketing placeholder
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [ ] 01-04-PLAN.md — /login + /signup pages with MagicLinkForm (full state machine + e2e auth)
+- [x] 01-04-PLAN.md — /login + /signup pages with MagicLinkForm (full state machine + e2e auth)
 
 ---
 
@@ -110,7 +110,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Auth | 0/4 (checkpoint at plan 01) | In progress | — |
+| 1. Foundation & Auth | 4/4 | Complete | 2026-05-17 |
 | 2. Trip Management & Photo Upload | 0/? | Not started | — |
 | 3. AI Story Generation | 0/? | Not started | — |
 | 4. Cinematic Viewer | 0/? | Not started | — |
