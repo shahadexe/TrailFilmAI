@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
@@ -27,6 +27,12 @@ export function PhotoUploadStep({ tripId, userId }: PhotoUploadStepProps) {
 
   const { uploadBatch, retryOne } = useUploadPipeline({ tripId, userId, setItems })
 
+  // WR-02: Guard against stale setItems calls after unmount during EXIF extraction
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    return () => { mountedRef.current = false }
+  }, [])
+
   // Accept new files: create preview URLs, add to state, then extract EXIF in background
   // IMPORTANT: extractExif must run on the ORIGINAL file BEFORE compression (RESEARCH Pitfall 1)
   const onFilesAccepted = useCallback(
@@ -46,6 +52,7 @@ export function PhotoUploadStep({ tripId, userId }: PhotoUploadStepProps) {
       await Promise.all(
         additions.map(async (item) => {
           const exif = await extractExif(item.file)
+          if (!mountedRef.current) return
           setItems((prev) => prev.map((p) => (p.id === item.id ? { ...p, exif } : p)))
         })
       )
