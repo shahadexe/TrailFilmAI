@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { compressPhoto } from '@/lib/utils/compress'
 import { updateTripCover } from '@/lib/trips/mutations'
 import { createClient } from '@/lib/supabase/client'
@@ -9,7 +9,10 @@ import type { PhotoItem } from './PhotoUploadGrid'
 type ItemUpdater = (updater: (prev: PhotoItem[]) => PhotoItem[]) => void
 
 function extFromMime(mime: string): string {
-  return (mime.split('/')[1] ?? 'jpg').toLowerCase().replace('jpeg', 'jpg')
+  const subtype = (mime.split('/')[1] ?? 'jpg').toLowerCase()
+  const ALLOWED = new Set(['jpeg', 'jpg', 'png', 'webp'])
+  const cleaned = subtype === 'jpeg' ? 'jpg' : subtype
+  return ALLOWED.has(cleaned) ? cleaned : 'jpg'
 }
 
 export function useUploadPipeline({
@@ -21,7 +24,8 @@ export function useUploadPipeline({
   userId: string
   setItems: ItemUpdater
 }) {
-  const supabase = createClient()
+  const supabaseRef = useRef(createClient())
+  const supabase = supabaseRef.current
 
   const uploadOne = useCallback(
     async (
@@ -130,7 +134,7 @@ export function useUploadPipeline({
         }
       }
     },
-    [uploadOne, setItems, supabase, tripId]
+    [uploadOne, setItems, tripId]
   )
 
   const retryOne = useCallback(
@@ -173,7 +177,7 @@ export function useUploadPipeline({
         )
       }
     },
-    [uploadOne, setItems, supabase, tripId]
+    [uploadOne, setItems, tripId]
   )
 
   return { uploadBatch, retryOne }
