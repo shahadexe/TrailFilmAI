@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useTripCreationStore } from '@/stores/trip-creation'
 import { TripDetailsForm } from './TripDetailsForm'
 import { StepIndicator } from './StepIndicator'
+import { PhotoUploadStep } from './PhotoUploadStep'
 
 export interface TripWizardProps {
   userId: string
@@ -12,6 +13,7 @@ export interface TripWizardProps {
 
 export function TripWizard({ userId }: TripWizardProps) {
   const step = useTripCreationStore((s) => s.step)
+  const tripId = useTripCreationStore((s) => s.tripId)
   const reset = useTripCreationStore((s) => s.reset)
   const shouldReduce = useReducedMotion()
   const easing = [0.22, 1, 0.36, 1] as const
@@ -46,10 +48,11 @@ export function TripWizard({ userId }: TripWizardProps) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0, transition: enterTransition }}
           >
-            {/* Plan 04 replaces this placeholder with <PhotoUploadStep tripId={...} userId={...} /> */}
-            <div data-step-2-placeholder className="rounded-md border border-ink-700 bg-ink-800 p-6 text-center">
-              <p className="font-sans text-sm text-parchment-400">Step 2 (photo upload) ships in Plan 04.</p>
-            </div>
+            {tripId ? (
+              <PhotoUploadStep tripId={tripId} userId={userId} />
+            ) : (
+              <p className="font-sans text-sm text-parchment-400">Trip not created — go back to Step 1.</p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
