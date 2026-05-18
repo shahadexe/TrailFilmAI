@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { TripCardGrid } from '@/components/trip/TripCardGrid'
-import { EmptyState } from '@/components/trip/EmptyState'
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 import type { Trip } from '@/types/database'
 
 export default async function DashboardPage() {
@@ -32,12 +32,12 @@ export default async function DashboardPage() {
     }
   )
 
+  const count = trips.length
+
   return (
-    <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="font-serif text-[28px] md:text-[40px] font-medium leading-tight tracking-tight text-ink-50 mb-8">
-        Your archive.
-      </h1>
-      {trips.length === 0 ? <EmptyState /> : <TripCardGrid trips={trips} />}
+    <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <DashboardHeader count={count} />
+      <TripCardGrid trips={trips} />
     </div>
   )
 }

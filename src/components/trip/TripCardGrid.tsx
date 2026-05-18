@@ -1,7 +1,11 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { TripCard } from './TripCard'
+import { DeleteTripDialog } from './DeleteTripDialog'
+import { EmptyState } from './EmptyState'
 import type { Trip } from '@/types/database'
 
 interface TripCardGridProps {
@@ -13,19 +17,19 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
+      staggerChildren: 0.1,
+      delayChildren: 0.05,
     },
   },
 }
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.65,
       ease: [0.22, 1, 0.36, 1] as const,
     },
   },
@@ -33,20 +37,80 @@ const cardVariants = {
 
 export function TripCardGrid({ trips }: TripCardGridProps) {
   const shouldReduce = useReducedMotion()
+  const router = useRouter()
+
+  const [items, setItems] = useState(trips)
+  const [targetId, setTargetId] = useState<string | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+
+  useEffect(() => {
+    setItems(trips)
+  }, [trips])
+
+  const handleRequestDelete = useCallback((tripId: string) => {
+    setTargetId(tripId)
+    setDialogOpen(true)
+  }, [])
+
+  const handleDeleted = useCallback(
+    (tripId: string) => {
+      setItems((prev) => prev.filter(({ trip }) => trip.id !== tripId))
+      router.refresh()
+    },
+    [router],
+  )
+
+  const handleOpenChange = useCallback((next: boolean) => {
+    setDialogOpen(next)
+    if (!next) setTargetId(null)
+  }, [])
+
+  if (items.length === 0) {
+    return <EmptyState />
+  }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial={shouldReduce ? false : 'hidden'}
-      animate="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-    >
-      {trips.map(({ trip, coverUrl }) => (
-        <motion.div key={trip.id} variants={cardVariants}>
-          <TripCard trip={trip} coverUrl={coverUrl} />
-        </motion.div>
-      ))}
-    </motion.div>
+    <>
+      <motion.div
+        variants={containerVariants}
+        initial={shouldReduce ? false : 'hidden'}
+        animate="visible"
+        className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-5"
+      >
+        <AnimatePresence mode="popLayout" initial={false}>
+          {items.map(({ trip, coverUrl }) => (
+            <motion.div
+              key={trip.id}
+              variants={cardVariants}
+              exit={
+                shouldReduce
+                  ? { opacity: 0 }
+                  : {
+                      opacity: 0,
+                      scale: 0.95,
+                      transition: {
+                        duration: 0.3,
+                        ease: [0.22, 1, 0.36, 1] as const,
+                      },
+                    }
+              }
+            >
+              <TripCard
+                trip={trip}
+                coverUrl={coverUrl}
+                onRequestDelete={handleRequestDelete}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
+
+      <DeleteTripDialog
+        open={dialogOpen}
+        onOpenChange={handleOpenChange}
+        tripId={targetId}
+        onDeleted={handleDeleted}
+      />
+    </>
   )
 }
