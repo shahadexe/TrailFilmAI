@@ -249,7 +249,7 @@ Plans:
 
 ## Phase 3: AI Story Generation
 
-**Goal:** Users select a narrative tone and the app calls Gemini 1.5 Flash to produce a structured 3-6 chapter story where each chapter is anchored to a photo and GPS location.
+**Goal:** Users select a narrative tone and the app calls Gemini 2.5 Flash (per D-01) to produce a structured 3-6 chapter story where each chapter is anchored to a photo and GPS location.
 **Requirements:** STORY-01, STORY-02, STORY-03
 **UI hint:** yes — tone selector and generation progress
 **Dependencies:** Phase 2
@@ -258,7 +258,7 @@ Plans:
 - **Tone selector:** 4 `.surface-card` option cards in a 2×2 grid — Cinematic, Poetic, Adventurous, Documentary. Selected card: `border-amber-accent/40 bg-[rgba(229,166,99,0.04)]` with amber label. Hover: ghost button treatment
 - **Tone labels:** Fraunces medium for tone name, Inter small for 1-line descriptor
 - **Generate CTA:** amber-filled full-width button. Once clicked: inline loading state with Framer Motion text morph ("Developing your story…") + `Loader2` spinner. Never navigate away mid-generation
-- **Generation progress:** subtle amber progress bar beneath the button (not a modal). Use `@radix-ui/react-progress`
+- **Generation progress:** subtle amber progress bar beneath the button (not a modal). CSS `@keyframes progress-indeterminate` (off main thread) per UI-SPEC — NOT `@radix-ui/react-progress` (would jank during Gemini call)
 - **Error state:** inline error below the button — never `window.alert()` or toast for generation failure. Give the user a retry path
 - **Transition to viewer:** once generation completes, navigate with a cinematic fade (opacity 0→1 on the viewer page)
 
@@ -267,6 +267,20 @@ Plans:
 2. After triggering generation, the app returns a story with between 3 and 6 distinct chapters within the Gemini free-tier rate limits.
 3. Every chapter is associated with exactly one photo and one GPS coordinate from the trip's uploaded photos.
 4. A story generated for the same trip with a different tone produces noticeably different prose — the tone selector has real effect.
+
+**Plans:** 5 plans
+
+Plans:
+**Wave 1** *(parallel — disjoint files)*
+- [ ] 03-01-PLAN.md — Gemini library (client, prompts with D-06 anti-slop, generateStory with Edge-safe btoa loop + gemini-2.5-flash)
+- [ ] 03-02-PLAN.md — Zustand store extension (step 1|2|3 + selectedTone), StepIndicator → "Step X of 3", globals.css `.progress-indeterminate` keyframe + reduced-motion guard
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-03-PLAN.md — Edge API route `/api/generate-story` + Wizard Step 3 (ToneSelector + ToneStep + GenerationProgress + AnimatePresence text morph) + TripWizard step 3 branch + /new resume params (D-11)
+
+**Wave 3** *(parallel — blocked on Wave 2 completion)*
+- [ ] 03-04-PLAN.md — Trip detail story section: RSC `story_chapters` fetch + StorySection + StoryChapterBlock (useInView scroll entrance) + DraftStoryCTA (D-11) + GeneratingStoryState (D-12)
+- [ ] 03-05-PLAN.md — Regeneration flow: TripDetailHeader 3-dot menu + RegenerationDialog (2-step Dialog: tone select → confirm → API call → router.refresh) + end-of-phase verification (26 checks)
 
 ---
 
@@ -324,6 +338,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 4/4 | Complete | 2026-05-17 |
 | 2. Trip Management & Photo Upload | 6/6 | Complete | 2026-05-18 |
-| 3. AI Story Generation | 0/? | Not started | — |
+| 3. AI Story Generation | 0/5 | Planned (3 waves) | — |
 | 4. Cinematic Viewer | 0/? | Not started | — |
 | 5. Sharing & Deploy | 0/? | Not started | — |
