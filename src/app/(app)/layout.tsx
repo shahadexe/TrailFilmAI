@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-ink text-ink-50">
-      <AppNav />
+      <AppNav userEmail={user.email ?? ''} />
       <main>{children}</main>
     </div>
   )
