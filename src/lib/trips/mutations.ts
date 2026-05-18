@@ -37,6 +37,11 @@ export async function deleteTrip(
   tripId: string,
   photos: Pick<Photo, 'storage_path'>[]
 ): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
   if (photos.length > 0) {
     const { error: storageError } = await supabase.storage
       .from('trip-photos')
@@ -49,7 +54,11 @@ export async function deleteTrip(
     }
   }
 
-  const { error } = await supabase.from('trips').delete().eq('id', tripId)
+  const { error } = await supabase
+    .from('trips')
+    .delete()
+    .eq('id', tripId)
+    .eq('user_id', user.id)
 
   if (error) throw error
 }

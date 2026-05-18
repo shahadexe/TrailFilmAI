@@ -30,25 +30,39 @@ export function UserMenu({ email }: UserMenuProps) {
 
   async function handleSignOut() {
     setPending(true)
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push('/login')
+    } catch (err) {
+      console.error('[UserMenu] sign-out failed:', err)
+    } finally {
+      setPending(false)
+    }
   }
 
   return (
     <div ref={menuRef} className="relative">
       <button
         type="button"
+        id="user-menu-trigger"
         onClick={() => setOpen((v) => !v)}
         aria-label="Open account menu"
+        aria-haspopup="menu"
         aria-expanded={open}
+        aria-controls="user-menu-dropdown"
         className="flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-ink-700 font-sans text-[13px] font-medium text-amber-accent transition-colors duration-300 ease-trailfilm hover:border-[rgba(229,166,99,0.4)] hover:bg-ink-800"
       >
         {initial}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-50 w-52 rounded-lg border border-ink-700 bg-ink-800 py-1 shadow-none">
+        <div
+          id="user-menu-dropdown"
+          role="menu"
+          aria-labelledby="user-menu-trigger"
+          className="absolute right-0 top-11 z-50 w-52 rounded-lg border border-ink-700 bg-ink-800 py-1 shadow-none"
+        >
           <p className="truncate px-4 py-2 font-sans text-[12px] text-parchment-400">{email}</p>
           <div className="mx-2 h-px bg-ink-700" />
           <button

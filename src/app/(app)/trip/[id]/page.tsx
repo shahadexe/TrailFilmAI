@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { TripDetailHeader } from '@/components/trip/TripDetailHeader'
-import { TripPhotoGrid, type PhotoWithUrl } from '@/components/trip/TripPhotoGrid'
+import { TripPhotoGrid, type PhotoForDisplay } from '@/components/trip/TripPhotoGrid'
 
 export default async function TripDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -33,11 +33,13 @@ export default async function TripDetailPage({ params }: { params: { id: string 
     .order('order_index', { ascending: true })
     .order('created_at', { ascending: true })
 
-  // Derive public URLs server-side — getPublicUrl is synchronous, never errors.
-  // Matches the dashboard cover URL pattern (Plan 02).
-  const photos: PhotoWithUrl[] = (photoRows ?? []).map((p) => ({
-    ...p,
+  // Project to a lean client-facing shape — omits storage_path, latitude, longitude so raw GPS
+  // coordinates and internal storage paths are never serialized into the RSC payload.
+  const photos: PhotoForDisplay[] = (photoRows ?? []).map((p) => ({
+    id: p.id,
     publicUrl: supabase.storage.from('trip-photos').getPublicUrl(p.storage_path).data.publicUrl,
+    taken_at: p.taken_at,
+    hasGps: p.latitude !== null && p.longitude !== null,
   }))
 
   return (

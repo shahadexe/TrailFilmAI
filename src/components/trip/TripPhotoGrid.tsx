@@ -2,12 +2,16 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { TripPhotoCell } from './TripPhotoCell'
-import type { Photo } from '@/types/database'
 
-export type PhotoWithUrl = Photo & { publicUrl: string }
+export type PhotoForDisplay = {
+  id: string
+  publicUrl: string
+  taken_at: string | null
+  hasGps: boolean
+}
 
 interface TripPhotoGridProps {
-  photos: PhotoWithUrl[]
+  photos: PhotoForDisplay[]
 }
 
 const containerVariants = {
@@ -45,7 +49,7 @@ export function TripPhotoGrid({ photos }: TripPhotoGridProps) {
     >
       {photos.map((photo, index) => (
         <motion.div key={photo.id} variants={cellVariants}>
-          <TripPhotoCell photo={photo} publicUrl={photo.publicUrl} index={index} />
+          <TripPhotoCell photo={photo} index={index} />
         </motion.div>
       ))}
     </motion.div>

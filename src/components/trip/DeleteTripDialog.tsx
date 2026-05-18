@@ -35,10 +35,13 @@ export function DeleteTripDialog({
     setPending(true)
     try {
       const supabase = createClient()
-      const { data: photoRows } = await supabase
+      const { data: photoRows, error: photosError } = await supabase
         .from('photos')
         .select('storage_path')
         .eq('trip_id', tripId)
+      if (photosError) {
+        console.error('[DeleteTripDialog] Failed to fetch photo paths — proceeding with DB delete, storage may be orphaned:', photosError)
+      }
       await deleteTrip(supabase, tripId, photoRows ?? [])
       toast.success('Trip deleted.')
       onDeleted(tripId)
