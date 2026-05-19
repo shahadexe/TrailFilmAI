@@ -1,6 +1,8 @@
 Ideation/
 
-.planning/
+.planning
+
+
 Instruct
 CONTEXT.md
 REQUIREMENTS.md
@@ -14,6 +16,8 @@ phases/
 .env.local
 .env.*.local
 .env*.local
+
+.env.example
 
 # Next.js
 /.next/

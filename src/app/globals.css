@@ -165,3 +165,112 @@
     opacity: 0.4;
   }
 }
+
+/* ── Landing page scroll-reveal ─────────────────────────────────── */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scroll-cue-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(7px); }
+}
+
+@keyframes story-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.reveal-up {
+  opacity: 0;
+  transform: translateY(48px);
+  filter: blur(6px);
+  will-change: transform, opacity;
+}
+
+.reveal-up.is-visible {
+  animation: reveal-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.reveal-fade {
+  opacity: 0;
+}
+
+.reveal-fade.is-visible {
+  animation: reveal-fade 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Stagger delay helpers */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-600 { animation-delay: 0.6s; }
+
+.scroll-cue {
+  animation: scroll-cue-bounce 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* Story text shimmer — decorative highlight across story text */
+.story-text-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(229, 166, 99, 0.06) 50%,
+    transparent 100%
+  );
+  background-size: 400px 100%;
+  animation: story-shimmer 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up,
+  .reveal-up.is-visible,
+  .reveal-fade,
+  .reveal-fade.is-visible {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .scroll-cue { animation: none; }
+  .story-text-shimmer { animation: none; }
+  .marquee-track { animation: none; }
+}
+
+/* ── Kinetic marquee ─────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  width: max-content;
+  animation: marquee 28s linear infinite;
+  will-change: transform;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* ── Parchment-300 (used in story preview) ───────────────────────── */
+/* Defined here as a utility since it's not in tailwind.config */
+.text-parchment-300 {
+  color: #CCC9C2;
+}
