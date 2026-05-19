@@ -11,7 +11,7 @@
 | 1 | Foundation & Auth | Project is scaffolded and users can authenticate via magic link | AUTH-01, AUTH-02, AUTH-03 | 4 |
 | 2 | Trip Management & Photo Upload | 6/6 | Complete |  |
 | 3 | AI Story Generation | App transforms uploaded photos into a structured, tone-driven narrative | STORY-01, STORY-02, STORY-03 | 4 |
-| 4 | Cinematic Viewer | 3/3 | Complete   | 2026-05-19 |
+| 4 | Cinematic Viewer | 3/3 | Complete — Human Verified | 2026-05-19 |
 | 5 | Sharing & Deploy | Trips are shareable via public URL and the app is live on Vercel | SHARE-01, SHARE-02 | 3 |
 
 ---
@@ -317,7 +317,7 @@ Plans:
 - [x] 04-02-PLAN.md — Mapbox tier: ViewerMap (dynamic import, dashed amber path, per-chapter flyTo, responsive sidebar/bottom-sheet) + NoGpsState fallback
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [x] 04-03-PLAN.md — Integration: RSC extension with server-side GPS extraction (D-06), AppNav suppression on cinematic route, CinematicViewer client wrapper, human end-to-end verification + npm run build
+- [x] 04-03-PLAN.md — Integration: RSC extension with server-side GPS extraction (D-06), AppNav suppression on cinematic route, CinematicViewer client wrapper, human end-to-end verification + npm run build — HUMAN VERIFIED APPROVED 2026-05-19
 
 ---
 
@@ -349,5 +349,5 @@ Plans:
 | 1. Foundation & Auth | 4/4 | Complete | 2026-05-17 |
 | 2. Trip Management & Photo Upload | 6/6 | Complete | 2026-05-18 |
 | 3. AI Story Generation | 0/5 | Planned (3 waves) | — |
-| 4. Cinematic Viewer | 0/3 | Planned (2 waves) | — |
+| 4. Cinematic Viewer | 3/3 | Complete — Human Verified | 2026-05-19 |
 | 5. Sharing & Deploy | 0/? | Not started | — |
