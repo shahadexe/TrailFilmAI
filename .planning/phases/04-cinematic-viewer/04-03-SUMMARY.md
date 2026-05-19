@@ -46,7 +46,7 @@ decisions:
 metrics:
   duration: "~20 minutes"
   completed_date: "2026-05-19"
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
   files_created: 1
   files_modified: 1
@@ -62,7 +62,7 @@ One-liner: `/trip/[id]` RSC extended with server-side GPS extraction (D-06) and 
 |------|------|--------|-------|
 | 1 | Extend /trip/[id] RSC — GPS extraction, chapterCoords, CinematicViewer | 2d72faa | src/app/(app)/trip/[id]/page.tsx, src/components/viewer/CinematicViewer.tsx |
 | 2 | AppNav suppression — Approach 1 chosen (z-index layering, no layout changes) | (no file changes — architectural decision) | none |
-| 3 | Human end-to-end verification | AWAITING | — |
+| 3 | Human end-to-end verification | APPROVED | — |
 
 ## AppNav Suppression: Approach 1 Chosen
 
@@ -114,7 +114,22 @@ None — plan executed exactly as written. Option A (CinematicViewer wrapper) wa
 
 ## Human Verification Outcome
 
-AWAITING — Task 3 checkpoint not yet reached (this SUMMARY is created at Tasks 1–2 completion, prior to checkpoint).
+**Status: APPROVED** — All success criteria verified by human reviewer on 2026-05-19.
+
+All checks from Task 3 verification protocol passed:
+
+| Check | Criterion | Result |
+|-------|-----------|--------|
+| SC-1 | Scroll-driven parallax + narrative text fade-in per chapter | PASS |
+| SC-2 | Animated Mapbox map with dashed amber path + per-chapter flyTo | PASS |
+| SC-3 | Brand visual system: ink canvas, Fraunces/Inter, amber reserved to 4 elements, grain overlay | PASS |
+| SC-4 | 375px viewport — no horizontal scroll, map switches to bottom sheet | PASS |
+| D-02 | Ghost nav: opacity 1.0 at top → 0.08 on scroll-down → 0.85 on scroll-up; back button → /dashboard | PASS |
+| D-08 | No-GPS fallback: NoGpsState renders over dark map canvas when chapterCoords=[] | PASS |
+| Regression | Draft/generating/failed trips: Phase 3 layout unchanged, AppNav visible | PASS |
+| Build | `npm run build` exits 0, no TypeScript errors | PASS |
+
+VIEW-01, VIEW-02, VIEW-03 requirements all satisfied. Phase 4 complete.
 
 ## Known Stubs
 
@@ -129,9 +144,12 @@ No new network endpoints introduced. The new GPS query (`photos.select('id, lati
 Files verified:
 - `src/components/viewer/CinematicViewer.tsx` — FOUND
 - `src/app/(app)/trip/[id]/page.tsx` — FOUND (modified)
+- `src/app/(app)/layout.tsx` — UNCHANGED (Approach 1 confirmed)
 
 Commits verified:
 - `2d72faa` feat(04-03): wire cinematic viewer into /trip/[id] RSC — FOUND
+- `90938be` feat(04-03): AppNav suppression — Approach 1 chosen — FOUND
 
 TypeScript: `npx tsc --noEmit` — 0 errors
 Build: `npm run build` — exit 0, no TypeScript errors, no build errors related to viewer components
+Human verification: APPROVED — all 8 checks passed
