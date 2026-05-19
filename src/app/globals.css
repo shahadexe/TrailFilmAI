@@ -14,15 +14,154 @@
   h1, h2, h3 {
     @apply font-serif;
   }
+
+  /* Refined scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: #222;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #333; }
+
+  /* Amber text selection */
+  ::selection {
+    background: rgba(229, 166, 99, 0.22);
+    color: #FAFAF7;
+  }
 }
 
-/* Custom utility for cinematic gradient overlays */
+/* Cinematic gradient overlays — used on TripCard covers */
 @layer utilities {
   .gradient-fade-bottom {
-    background: linear-gradient(to bottom, transparent 0%, rgba(10, 10, 10, 0.6) 70%, rgba(10, 10, 10, 1) 100%);
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(10, 10, 10, 0.25) 35%,
+      rgba(10, 10, 10, 0.82) 72%,
+      rgba(10, 10, 10, 0.97) 100%
+    );
   }
 
   .gradient-fade-top {
     background: linear-gradient(to top, transparent 0%, rgba(10, 10, 10, 0.6) 70%, rgba(10, 10, 10, 1) 100%);
+  }
+
+  /* Ambient radial amber glow — absolute child inside relative container */
+  .ambient-glow {
+    background: radial-gradient(
+      ellipse 80% 60% at 50% 50%,
+      rgba(229, 166, 99, 0.08) 0%,
+      transparent 65%
+    );
+  }
+
+  .ambient-glow-sm {
+    background: radial-gradient(
+      ellipse 60% 50% at 50% 40%,
+      rgba(229, 166, 99, 0.06) 0%,
+      transparent 60%
+    );
+  }
+
+  /* Glass card surface */
+  .surface-card {
+    background: #0D0D0D;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* Shimmer animation for loading skeletons */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #141414 25%,
+    #1e1e1e 50%,
+    #141414 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Film grain overlay texture */
+.grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+/* ── Atmospheric bokeh float ─────────────────────────────────────── */
+@keyframes float-bokeh {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  30%       { transform: translateY(-22px) translateX(12px); }
+  60%       { transform: translateY(-10px) translateX(-16px); }
+}
+
+/* ── Dropzone drag-over concentric rings ─────────────────────────── */
+@keyframes expand-ring {
+  0%   { transform: scale(0.7);  opacity: 0.55; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+
+/* ── Ambient glow breathe ────────────────────────────────────────── */
+@keyframes glow-breathe {
+  0%, 100% { transform: scale(1);    opacity: 0.85; }
+  50%       { transform: scale(1.18); opacity: 1; }
+}
+
+/* ── Auth card entrance ──────────────────────────────────────────── */
+@keyframes card-enter {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.card-enter {
+  animation: card-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-enter          { animation: none; }
+  .ambient-glow-animate { animation: none !important; }
+}
+
+/* ── Nav bottom amber accent hairline ───────────────────────────── */
+.nav-accent-line {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(229, 166, 99, 0.38),
+    transparent
+  );
+}
+
+/* ── Step indicator active glow ─────────────────────────────────── */
+.step-bar-glow {
+  box-shadow: 0 0 10px rgba(229, 166, 99, 0.55),
+              0 0 4px  rgba(229, 166, 99, 0.35);
+}
+
+/* Generation progress bar (Phase 3 - Wizard Step 3 + regeneration on /trip/[id]) */
+@keyframes progress-indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+.progress-indeterminate {
+  animation: progress-indeterminate 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-indeterminate {
+    animation: none;
+    width: 100%;
+    opacity: 0.4;
   }
 }
