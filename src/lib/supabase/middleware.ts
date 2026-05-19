@@ -30,6 +30,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   const pathname = request.nextUrl.pathname
   // Keep in sync with src/app/(app)/ route group — any new (app) route prefix must be added here.
   // The (app)/layout.tsx server guard provides defense-in-depth for missed prefixes.
+  // /t/* (public viewer) is intentionally absent — unauthenticated access is required. Keep in sync with src/app/(public)/ route group.
   const isProtected =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/new') ||
