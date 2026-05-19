@@ -7,10 +7,12 @@ import { ChevronLeft } from 'lucide-react'
 export function ViewerNav() {
   const [navOpacity, setNavOpacity] = useState(1)
 
+  const prefersReduced = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false
+
   useEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let prev = 0
-    let raf: number
 
     const update = () => {
       const y = window.scrollY
@@ -31,11 +33,10 @@ export function ViewerNav() {
       }
 
       setNavOpacity(opacity)
-      raf = requestAnimationFrame(update)
     }
 
-    raf = requestAnimationFrame(update)
-    return () => cancelAnimationFrame(raf)
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
   }, [])
 
   return (
@@ -43,7 +44,9 @@ export function ViewerNav() {
       className="fixed top-0 left-0 right-0 z-40 border-b border-[rgba(255,255,255,0.05)] bg-ink/80 backdrop-blur-xl"
       style={{
         opacity: navOpacity,
-        transition: 'opacity 300ms cubic-bezier(0.22, 1, 0.36, 1)',
+        transition: prefersReduced
+          ? 'none'
+          : 'opacity 300ms cubic-bezier(0.22, 1, 0.36, 1)',
       }}
     >
       <div className="mx-auto flex h-14 md:h-16 max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
