@@ -36,7 +36,7 @@ export interface StoryChapter {
   chapter_index: number
   title: string
   narrative: string
-  photo_ids: string[]
+  photo_ids: string[] | null
   location_name: string | null
   created_at: string
 }
