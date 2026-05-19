@@ -274,3 +274,14 @@
 .text-parchment-300 {
   color: #CCC9C2;
 }
+
+@keyframes markerPulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker-pulse {
+    animation: none;
+  }
+}

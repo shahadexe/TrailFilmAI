@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
-import { motion, useReducedMotion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import { motion, useReducedMotion, useScroll, useTransform, useInView } from 'framer-motion'
+import { WorldMap } from '@/components/ui/world-map'
 
 // ─── Scroll-reveal hook ────────────────────────────────────────────────────
 function useReveal(threshold = 0.1) {
@@ -73,34 +74,15 @@ const stats = [
   { value: '12min', label: 'avg to first draft' },
 ]
 
-// Journey pins — svgX = (lon+180)/360*1008, svgY = (90-lat)/180*504
-// Stored as % of viewBox so pins stay relative regardless of rendered size
-// x% = svgX/1008*100, y% = svgY/504*100
-const journeyPins = [
-  // Iceland: lon=-18, lat=65  → x=45.0%, y=13.9%
-  { id: 1, x: 45.0, y: 13.9, label: 'Iceland', story: 'Midnight sun on Vatnajökull. 312 photos, 3 chapters.' },
-  // Mongolia: lon=103, lat=47 → x=78.7%, y=23.9%
-  { id: 2, x: 78.7, y: 23.9, label: 'Mongolia', story: 'Steppes at dusk. 204 photos, 4 chapters.' },
-  // Morocco: lon=-5, lat=32   → x=48.6%, y=32.2%
-  { id: 3, x: 48.6, y: 32.2, label: 'Morocco', story: 'The medina before dawn. 187 photos, 2 chapters.' },
-  // Borneo: lon=114, lat=1    → x=81.7%, y=49.4%
-  { id: 4, x: 81.7, y: 49.4, label: 'Borneo', story: 'River mist and orangutans. 421 photos, 5 chapters.' },
-  // Patagonia: lon=-72, lat=-51 → x=30.0%, y=78.3%
-  { id: 5, x: 30.0, y: 78.3, label: 'Patagonia', story: 'Torres del Paine in fog. 340 photos, 4 chapters.' },
-  // Ethiopia: lon=38, lat=9   → x=60.5%, y=45.0%
-  { id: 6, x: 60.5, y: 45.0, label: 'Ethiopia', story: 'Lalibela at dawn. 267 photos, 3 chapters.' },
-  // New Zealand: lon=172, lat=-41 → x=97.2%, y=72.8%
-  { id: 7, x: 97.2, y: 72.8, label: 'New Zealand', story: 'Fiordland in rain. 389 photos, 4 chapters.' },
-  // Alaska: lon=-153, lat=63  → x=7.5%, y=15.0%
-  { id: 8, x: 7.5, y: 15.0, label: 'Alaska', story: 'Denali in first snow. 156 photos, 2 chapters.' },
-  // Japan: lon=138, lat=36    → x=88.3%, y=30.0%
-  { id: 9, x: 88.3, y: 30.0, label: 'Japan', story: 'Kumano Kodo in autumn. 512 photos, 6 chapters.' },
-  // Colombia: lon=-74, lat=4  → x=29.4%, y=47.8%
-  { id: 10, x: 29.4, y: 47.8, label: 'Colombia', story: 'Coffee highlands at dawn. 143 photos, 2 chapters.' },
-  // Lake Baikal (Siberia): lon=108, lat=53 → x=80.2%, y=20.6%
-  { id: 11, x: 80.2, y: 20.6, label: 'Siberia', story: 'Lake Baikal in winter. 231 photos, 3 chapters.' },
-  // Tanzania/Kilimanjaro: lon=37, lat=-3 → x=60.3%, y=51.7%
-  { id: 12, x: 60.3, y: 51.7, label: 'Kilimanjaro', story: 'Sunrise above the clouds. 178 photos, 2 chapters.' },
+const JOURNEY_ARCS = [
+  { start: { lat: 65, lng: -18 },  end: { lat: -3,  lng: 37  } },  // Iceland → Kilimanjaro
+  { start: { lat: 63, lng: -153 }, end: { lat: -51, lng: -72 } },  // Alaska → Patagonia
+  { start: { lat: 32, lng: -5  },  end: { lat: 9,   lng: 38  } },  // Morocco → Ethiopia
+  { start: { lat: 65, lng: -18 },  end: { lat: 47,  lng: 103 } },  // Iceland → Mongolia
+  { start: { lat: 36, lng: 138 },  end: { lat: -41, lng: 172 } },  // Japan → New Zealand
+  { start: { lat: 4,  lng: -74 },  end: { lat: 32,  lng: -5  } },  // Colombia → Morocco
+  { start: { lat: 53, lng: 108 },  end: { lat: 1,   lng: 114 } },  // Siberia → Borneo
+  { start: { lat: 63, lng: -153 }, end: { lat: 36,  lng: 138 } },  // Alaska → Japan
 ]
 
 // ─── Page ──────────────────────────────────────────────────────────────────
@@ -663,137 +645,23 @@ function StoryChapter({ label, title, text }: { label: string; title: string; te
   )
 }
 
-// ─── Real world map — Natural Earth simplified equirectangular (180°W→180°E, 90°N→90°S)
-// viewBox "0 0 1008 504" maps lon/lat: x = (lon+180)/360*1008, y = (90-lat)/180*504
-const WORLD_PATHS = [
-  // North America (mainland)
-  "M87,72 L100,58 L115,52 L128,56 L140,50 L158,46 L170,52 L182,48 L194,54 L202,62 L210,58 L220,64 L226,74 L218,82 L224,92 L218,102 L222,112 L214,122 L206,134 L196,144 L184,154 L172,162 L162,172 L150,182 L140,190 L128,196 L118,190 L108,182 L100,172 L94,160 L92,148 L96,136 L94,124 L100,114 L104,102 L100,92 L104,82 Z",
-  // Alaska
-  "M56,64 L68,58 L80,60 L88,68 L84,76 L74,78 L62,76 Z",
-  // Greenland
-  "M222,30 L238,22 L256,20 L270,26 L276,38 L272,52 L260,60 L244,62 L232,54 L224,42 Z",
-  // Central America
-  "M148,196 L156,202 L162,210 L164,218 L158,224 L150,222 L144,214 L140,206 Z",
-  // Caribbean (Cuba approximation)
-  "M166,192 L178,188 L186,192 L182,198 L170,198 Z",
-  // South America
-  "M156,228 L172,220 L188,222 L202,230 L214,242 L222,256 L226,272 L226,290 L222,308 L214,326 L204,342 L192,356 L178,368 L164,376 L152,372 L142,360 L136,346 L132,330 L132,314 L134,298 L136,282 L138,266 L140,250 L146,238 Z",
-  // Iceland
-  "M388,54 L400,50 L410,54 L412,62 L404,68 L392,66 L386,60 Z",
-  // UK + Ireland
-  "M420,80 L428,74 L436,76 L438,84 L434,92 L424,92 L420,84 Z M412,82 L418,78 L422,82 L420,90 L412,88 Z",
-  // Iberian Peninsula
-  "M418,104 L432,98 L444,100 L448,112 L442,122 L430,126 L418,120 L414,110 Z",
-  // France
-  "M438,90 L454,86 L464,90 L466,100 L458,108 L444,110 L436,102 Z",
-  // Scandinavia + Norway
-  "M450,56 L460,44 L470,40 L482,44 L488,54 L482,64 L470,68 L458,66 Z M466,68 L474,60 L484,62 L484,72 L474,76 L466,74 Z",
-  // Germany, Benelux, central Europe
-  "M452,84 L468,78 L480,80 L482,90 L474,98 L460,100 L450,94 Z",
-  // Italy
-  "M458,100 L470,94 L478,98 L476,112 L466,124 L456,130 L450,120 L452,108 Z",
-  // Balkans + Greece
-  "M476,96 L490,92 L500,96 L504,108 L498,118 L484,118 L474,110 Z",
-  // Eastern Europe + Baltic
-  "M476,72 L494,66 L510,64 L520,70 L518,84 L508,90 L490,90 L478,82 Z",
-  // Africa (main continent)
-  "M432,148 L450,138 L468,134 L486,136 L500,142 L512,152 L520,164 L522,178 L518,194 L510,210 L500,226 L488,242 L474,256 L460,268 L446,276 L432,272 L420,260 L412,246 L406,230 L404,214 L404,198 L408,182 L414,168 L422,156 Z",
-  // Madagascar
-  "M524,234 L532,226 L540,230 L542,244 L536,254 L528,252 L522,242 Z",
-  // Arabian Peninsula
-  "M516,138 L534,128 L550,126 L562,132 L566,144 L560,156 L546,162 L532,158 L520,148 Z",
-  // Turkey
-  "M492,104 L510,98 L526,98 L534,106 L530,116 L514,120 L496,118 L490,110 Z",
-  // Russia (Europe) / Ukraine
-  "M490,72 L520,62 L548,60 L566,64 L572,74 L560,84 L538,88 L514,88 L494,82 Z",
-  // Russia (Siberia / Asia main)
-  "M548,40 L590,30 L640,24 L690,22 L736,26 L774,34 L800,44 L810,56 L800,68 L780,74 L750,76 L718,74 L686,72 L652,68 L618,64 L586,60 L560,56 Z",
-  // Kazakhstan / Central Asia
-  "M556,80 L590,72 L624,70 L650,74 L660,86 L644,96 L612,100 L578,98 L556,90 Z",
-  // Iran
-  "M548,118 L568,112 L588,112 L600,120 L600,132 L588,140 L566,142 L548,134 Z",
-  // Afghanistan / Pakistan
-  "M586,108 L606,102 L626,102 L638,110 L634,122 L618,128 L596,128 L582,120 Z",
-  // India
-  "M608,128 L628,122 L642,126 L646,140 L640,154 L626,164 L610,166 L598,156 L596,142 Z",
-  // Sri Lanka
-  "M626,168 L632,164 L636,168 L634,174 L626,174 Z",
-  // China (main)
-  "M636,80 L670,70 L706,68 L728,74 L734,86 L724,98 L704,106 L678,110 L650,110 L628,106 L618,96 L620,84 Z",
-  // Korean Peninsula
-  "M744,90 L754,84 L762,86 L762,96 L754,102 L744,98 Z",
-  // Japan (Honshu)
-  "M770,80 L782,74 L792,78 L794,88 L786,96 L774,94 Z",
-  // Japan (Kyushu/Shikoku)
-  "M760,94 L768,90 L776,94 L774,100 L766,102 Z",
-  // Indochina (SE Asia peninsula)
-  "M676,118 L694,112 L710,114 L718,126 L714,138 L702,144 L686,142 L674,132 Z",
-  // Malay Peninsula
-  "M698,144 L706,138 L714,142 L714,154 L706,162 L698,158 Z",
-  // Sumatra
-  "M700,162 L722,154 L740,154 L750,164 L744,174 L722,176 L704,172 Z",
-  // Borneo
-  "M724,160 L744,156 L760,158 L766,170 L760,182 L740,184 L724,176 Z",
-  // Java
-  "M720,178 L740,174 L754,176 L754,184 L736,186 L720,184 Z",
-  // Philippines
-  "M754,136 L762,130 L770,132 L772,142 L764,148 L756,144 Z",
-  // Australia
-  "M756,296 L784,284 L812,282 L838,286 L858,296 L870,310 L872,328 L864,346 L848,360 L828,368 L804,370 L780,364 L760,352 L746,336 L744,318 L748,304 Z",
-  // Tasmania
-  "M800,374 L810,370 L818,374 L816,382 L806,384 Z",
-  // New Zealand (North Island)
-  "M874,342 L882,334 L890,336 L892,346 L886,354 L876,352 Z",
-  // New Zealand (South Island)
-  "M876,356 L886,350 L894,352 L896,364 L888,374 L878,372 L872,364 Z",
-  // Papua New Guinea
-  "M794,222 L812,214 L830,214 L842,222 L840,232 L822,236 L804,232 Z",
-  // Morocco / NW Africa
-  "M418,130 L434,124 L442,130 L440,142 L428,146 L416,140 Z",
-]
-
 // ─── WorldMapSection ───────────────────────────────────────────────────────
 function WorldMapSection() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const [activePin, setActivePin] = useState<number | null>(null)
-  const [visiblePins, setVisiblePins] = useState<Set<number>>(new Set())
   const headingRef = useReveal()
+  const headlineRef = useRef<HTMLHeadingElement>(null)
+  const isHeadlineInView = useInView(headlineRef, { once: true, margin: '-80px' })
+  const shouldReduceMotion = useReducedMotion()
 
-  // Stagger-reveal pins on scroll into view
-  useEffect(() => {
-    const el = sectionRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          journeyPins.forEach((pin, i) => {
-            setTimeout(() => {
-              setVisiblePins(prev => new Set(Array.from(prev).concat(pin.id)))
-            }, i * 120)
-          })
-          observer.unobserve(el)
-        }
-      },
-      { threshold: 0.2 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
+  const headline = 'Journeys archived across the world.'
 
   return (
-    <section ref={sectionRef} className="relative py-24 md:py-36 overflow-hidden">
-      {/* Ambient glow */}
+    <section className="relative py-24 md:py-36 overflow-hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 90% 60% at 50% 50%, rgba(229,166,99,0.04) 0%, transparent 65%)',
-        }}
+        style={{ background: 'radial-gradient(ellipse 90% 60% at 50% 50%, rgba(229,166,99,0.04) 0%, transparent 65%)' }}
       />
-
       <div className="mx-auto max-w-7xl px-8 md:px-16">
-
-        {/* Header */}
         <div ref={headingRef} className="reveal-up mb-16">
           <div className="flex items-center gap-3 mb-5">
             <div className="h-px w-6 bg-amber-accent/50" />
@@ -801,176 +669,39 @@ function WorldMapSection() {
           </div>
           <div className="grid md:grid-cols-[1fr_auto] md:items-end md:gap-16">
             <h2
+              ref={headlineRef}
               className="font-serif font-medium uppercase leading-[0.94] text-ink-50"
               style={{ fontSize: 'clamp(28px, 4.5vw, 52px)' }}
             >
-              Journeys archived<br />across the world.
+              {shouldReduceMotion ? (
+                headline
+              ) : (
+                headline.split('').map((char, i) =>
+                  char === ' ' ? (
+                    <motion.span key={i} style={{ display: 'inline-block', width: '0.3em' }} />
+                  ) : (
+                    <motion.span
+                      key={i}
+                      style={{ display: 'inline-block' }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={isHeadlineInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                      transition={{ duration: 0.5, delay: i * 0.03, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {char}
+                    </motion.span>
+                  )
+                )
+              )}
             </h2>
             <p className="mt-4 max-w-[260px] font-sans text-[13px] leading-[1.7] text-parchment-400 md:mt-0 md:text-right">
-              Every pin is a real trip. Hover to see the story that lives inside it.
+              Every arc is a real journey. Twelve trips. One archive.
             </p>
           </div>
         </div>
-
-        {/* Map container */}
         <div className="relative overflow-hidden rounded-[2rem] border border-white/[0.06] bg-white/[0.015]">
-
-          {/* SVG World Map — Natural Earth simplified, viewBox 0 0 1008 504
-              x = (lon + 180) / 360 * 1008   y = (90 - lat) / 180 * 504 */}
-          <div className="relative w-full" style={{ paddingBottom: '50%' }}>
-            <svg
-              viewBox="0 0 1008 504"
-              className="absolute inset-0 w-full h-full"
-              aria-hidden
-            >
-              <defs>
-                <pattern id="mapGrid" width="56" height="56" patternUnits="userSpaceOnUse">
-                  <path d="M56 0 L0 0 0 56" fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="0.5" />
-                </pattern>
-              </defs>
-              <rect width="1008" height="504" fill="url(#mapGrid)" />
-
-              {/* Latitude lines: 60N, 30N, 0 (equator), 30S, 60S */}
-              {[84, 168, 252, 336, 420].map(y => (
-                <line key={y} x1="0" y1={y} x2="1008" y2={y}
-                  stroke={y === 252 ? 'rgba(229,166,99,0.10)' : 'rgba(255,255,255,0.04)'}
-                  strokeWidth={y === 252 ? 1 : 0.5}
-                  strokeDasharray={y === 252 ? '6 10' : undefined} />
-              ))}
-              {/* Longitude lines every 30° */}
-              {[84, 168, 252, 336, 420, 504, 588, 672, 756, 840, 924].map(x => (
-                <line key={x} x1={x} y1="0" x2={x} y2="504" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-              ))}
-
-              {/* ── Land masses (Natural Earth simplified equirectangular) ── */}
-              {WORLD_PATHS.map((d, i) => (
-                <path key={i} d={d}
-                  fill="rgba(255,255,255,0.055)"
-                  stroke="rgba(255,255,255,0.18)"
-                  strokeWidth="0.8"
-                  strokeLinejoin="round"
-                />
-              ))}
-            </svg>
-
-            {/* Journey pins */}
-            {journeyPins.map((pin) => (
-              <JourneyPin
-                key={pin.id}
-                pin={pin}
-                isVisible={visiblePins.has(pin.id)}
-                isActive={activePin === pin.id}
-                onEnter={() => setActivePin(pin.id)}
-                onLeave={() => setActivePin(null)}
-              />
-            ))}
-          </div>
-
-          {/* Bottom info strip */}
-          <div className="border-t border-white/[0.05] px-8 py-5 flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-amber-accent" />
-                <span className="font-sans text-[11px] text-parchment-600">Archived journey</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full border border-amber-accent/40 bg-transparent" style={{
-                  boxShadow: '0 0 6px rgba(229,166,99,0.3)'
-                }} />
-                <span className="font-sans text-[11px] text-parchment-600">Active story</span>
-              </div>
-            </div>
-            <span className="font-sans text-[11px] text-parchment-600 hidden sm:block">
-              {journeyPins.length} journeys &middot; hover to explore
-            </span>
-          </div>
+          <WorldMap dots={JOURNEY_ARCS} />
         </div>
       </div>
     </section>
-  )
-}
-
-// ─── JourneyPin ────────────────────────────────────────────────────────────
-function JourneyPin({
-  pin,
-  isVisible,
-  isActive,
-  onEnter,
-  onLeave,
-}: {
-  pin: (typeof journeyPins)[0]
-  isVisible: boolean
-  isActive: boolean
-  onEnter: () => void
-  onLeave: () => void
-}) {
-  return (
-    <div
-      className="absolute"
-      style={{ left: `${pin.x}%`, top: `${pin.y}%`, transform: 'translate(-50%, -50%)' }}
-    >
-      {/* Ripple ring */}
-      <AnimatePresence>
-        {isActive && (
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0.6 }}
-            animate={{ scale: 2.5, opacity: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: 'easeOut', repeat: Infinity }}
-            className="absolute inset-0 rounded-full border border-amber-accent/50"
-            style={{ transform: 'translate(-50%, -50%)', left: '50%', top: '50%' }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Pin dot */}
-      <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={isVisible ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        whileHover={{ scale: 1.4 }}
-        whileTap={{ scale: 0.9 }}
-        onMouseEnter={onEnter}
-        onMouseLeave={onLeave}
-        onFocus={onEnter}
-        onBlur={onLeave}
-        className="relative z-10 h-3 w-3 rounded-full bg-amber-accent cursor-pointer focus:outline-none"
-        style={{
-          boxShadow: isActive
-            ? '0 0 12px rgba(229,166,99,0.8), 0 0 4px rgba(229,166,99,0.6)'
-            : '0 0 6px rgba(229,166,99,0.4)',
-        }}
-        aria-label={`Journey: ${pin.label}`}
-      />
-
-      {/* Tooltip */}
-      <AnimatePresence>
-        {isActive && (
-          <motion.div
-            initial={{ opacity: 0, y: 6, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 4, scale: 0.95 }}
-            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            className="pointer-events-none absolute z-20 w-44 rounded-xl border border-white/10 bg-ink/95 px-4 py-3 backdrop-blur-md"
-            style={{
-              bottom: 'calc(100% + 10px)',
-              left: '50%',
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <p className="mb-1 font-sans text-[10px] uppercase tracking-[0.18em] text-amber-accent/80">
-              {pin.label}
-            </p>
-            <p className="font-sans text-[11px] leading-[1.6] text-parchment-400">
-              {pin.story}
-            </p>
-            {/* Caret */}
-            <div
-              className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b border-r border-white/10 bg-ink"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import { APIProvider } from '@vis.gl/react-google-maps'
 import { ViewerNav } from '@/components/viewer/ViewerNav'
 import { ScrollProgress } from '@/components/viewer/ScrollProgress'
 import { ChapterSection } from '@/components/viewer/ChapterSection'
@@ -11,7 +12,7 @@ import type { StoryChapter } from '@/types/database'
 import type { ChapterCoord } from '@/components/viewer/ViewerMap'
 import type { PhotoForDisplay } from '@/components/trip/TripPhotoGrid'
 
-// Dynamic import — mapbox-gl uses browser APIs; cannot be server-rendered
+// Dynamic import — @vis.gl/react-google-maps uses browser APIs; cannot be server-rendered
 const ViewerMap = dynamic(
   () => import('@/components/viewer/ViewerMap'),
   { ssr: false }
@@ -112,13 +113,15 @@ export function CinematicViewer({
         )}
       </div>
 
-      <ViewerMap
-        chapterCoords={coords}
-        activeChapterIndex={activeChapterIndex}
-        pinPlacingForChapter={pinPlacingForChapter}
-        onPinPlaced={handlePinPlaced}
-        onCancelPinPlacing={() => setPinPlacingForChapter(undefined)}
-      />
+      <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+        <ViewerMap
+          chapterCoords={coords}
+          activeChapterIndex={activeChapterIndex}
+          pinPlacingForChapter={pinPlacingForChapter}
+          onPinPlaced={handlePinPlaced}
+          onCancelPinPlacing={() => setPinPlacingForChapter(undefined)}
+        />
+      </APIProvider>
 
       {/* LocationEditor — fixed overlay that matches the map panel geometry so it sits over the map
           without being a child of the dynamic ViewerMap (which would cause remount on state change) */}
