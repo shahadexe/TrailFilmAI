@@ -18,12 +18,14 @@ interface CinematicViewerProps {
   chapters: StoryChapter[]
   photoUrlByChapter: Record<string, string>
   chapterCoords: ChapterCoord[]
+  showNav?: boolean
 }
 
 export function CinematicViewer({
   chapters,
   photoUrlByChapter,
   chapterCoords,
+  showNav,
 }: CinematicViewerProps) {
   const [activeChapterIndex, setActiveChapterIndex] = useState<number | undefined>(undefined)
   const handleChapterInView = useCallback((idx: number) => {
@@ -32,7 +34,7 @@ export function CinematicViewer({
 
   return (
     <>
-      <ViewerNav />
+      {showNav !== false && <ViewerNav />}
       <ScrollProgress />
 
       {/* Story content — offset from fixed map panel on desktop (38vw right sidebar) and mobile (40dvh bottom sheet) */}
