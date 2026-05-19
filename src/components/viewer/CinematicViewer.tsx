@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { ViewerNav } from '@/components/viewer/ViewerNav'
 import { ScrollProgress } from '@/components/viewer/ScrollProgress'
@@ -26,6 +26,9 @@ export function CinematicViewer({
   chapterCoords,
 }: CinematicViewerProps) {
   const [activeChapterIndex, setActiveChapterIndex] = useState<number | undefined>(undefined)
+  const handleChapterInView = useCallback((idx: number) => {
+    setActiveChapterIndex(idx)
+  }, [])
 
   return (
     <>
@@ -42,7 +45,7 @@ export function CinematicViewer({
               chapter={chapter}
               chapterIndex={i}
               photoUrl={photoUrl}
-              onInView={(idx) => setActiveChapterIndex(idx)}
+              onInView={handleChapterInView}
             />
           )
         })}
