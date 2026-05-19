@@ -11,7 +11,7 @@
 | 1 | Foundation & Auth | Project is scaffolded and users can authenticate via magic link | AUTH-01, AUTH-02, AUTH-03 | 4 |
 | 2 | Trip Management & Photo Upload | 6/6 | Complete |  |
 | 3 | AI Story Generation | App transforms uploaded photos into a structured, tone-driven narrative | STORY-01, STORY-02, STORY-03 | 4 |
-| 4 | Cinematic Viewer | Users experience their trip as a cinematic, scroll-driven story with map | VIEW-01, VIEW-02, VIEW-03 | 4 |
+| 4 | Cinematic Viewer | 3/3 | Complete   | 2026-05-19 |
 | 5 | Sharing & Deploy | Trips are shareable via public URL and the app is live on Vercel | SHARE-01, SHARE-02 | 3 |
 
 ---
@@ -309,15 +309,15 @@ Plans:
 3. The viewer renders exclusively in the brand visual system: `#0A0A0A` canvas, `#FAFAF7` body text, `#E5A663` accent, Fraunces for headlines, Inter for body — no off-brand styles.
 4. The viewer is fully usable on a 375px viewport without horizontal scroll or broken layout.
 
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 **Wave 1** *(parallel — disjoint files)*
-- [ ] 04-01-PLAN.md — Viewer chrome: ChapterSection (parallax + scroll-linked text fade), ViewerNav (ghost floating nav with scroll-fade), ScrollProgress (left-edge amber hairline)
-- [ ] 04-02-PLAN.md — Mapbox tier: ViewerMap (dynamic import, dashed amber path, per-chapter flyTo, responsive sidebar/bottom-sheet) + NoGpsState fallback
+- [x] 04-01-PLAN.md — Viewer chrome: ChapterSection (parallax + scroll-linked text fade), ViewerNav (ghost floating nav with scroll-fade), ScrollProgress (left-edge amber hairline)
+- [x] 04-02-PLAN.md — Mapbox tier: ViewerMap (dynamic import, dashed amber path, per-chapter flyTo, responsive sidebar/bottom-sheet) + NoGpsState fallback
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 04-03-PLAN.md — Integration: RSC extension with server-side GPS extraction (D-06), AppNav suppression on cinematic route, CinematicViewer client wrapper, human end-to-end verification + npm run build
+- [x] 04-03-PLAN.md — Integration: RSC extension with server-side GPS extraction (D-06), AppNav suppression on cinematic route, CinematicViewer client wrapper, human end-to-end verification + npm run build
 
 ---
 
