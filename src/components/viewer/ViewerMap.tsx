@@ -83,18 +83,22 @@ export function ViewerMap({ chapterCoords, activeChapterIndex }: ViewerMapProps)
           },
         })
 
-        map.current.addLayer({
-          id: 'route',
-          type: 'line',
-          source: 'route',
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: {
-            'line-color': '#E5A663',
-            'line-width': 2,
-            'line-opacity': 0.8,
-            'line-dasharray': [2, 2],
-          },
-        })
+        // Guard: only add the layer if the source was successfully registered
+        // (prevents "source already exists" Mapbox error if cleanup fires mid-callback)
+        if (map.current.getSource('route')) {
+          map.current.addLayer({
+            id: 'route',
+            type: 'line',
+            source: 'route',
+            layout: { 'line-join': 'round', 'line-cap': 'round' },
+            paint: {
+              'line-color': '#E5A663',
+              'line-width': 2,
+              'line-opacity': 0.8,
+              'line-dasharray': [2, 2],
+            },
+          })
+        }
       }
     }
 
