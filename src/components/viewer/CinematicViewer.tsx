@@ -118,9 +118,17 @@ export function CinematicViewer({
         pinPlacingForChapter={pinPlacingForChapter}
         onPinPlaced={handlePinPlaced}
         onCancelPinPlacing={() => setPinPlacingForChapter(undefined)}
-      >
-        {/* LocationEditor lives inside the map panel so it sits over the map */}
-        {isOwnerView && (
+      />
+
+      {/* LocationEditor — fixed overlay that matches the map panel geometry so it sits over the map
+          without being a child of the dynamic ViewerMap (which would cause remount on state change) */}
+      {isOwnerView && (
+        <div className={[
+          // Mobile: above the bottom sheet (40dvh tall), sits at bottom of screen above it
+          'fixed bottom-[40dvh] left-0 right-0 z-30',
+          // Desktop: right sidebar, bottom portion
+          'md:bottom-0 md:left-auto md:right-0 md:w-[38vw]',
+        ].join(' ')}>
           <LocationEditor
             tripId={tripId!}
             chapters={chapters}
@@ -128,8 +136,8 @@ export function CinematicViewer({
             onPinPlacingChange={setPinPlacingForChapter}
             onLocationSaved={handleLocationSaved}
           />
-        )}
-      </ViewerMap>
+        </div>
+      )}
     </>
   )
 }

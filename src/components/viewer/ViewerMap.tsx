@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { NoGpsState } from '@/components/viewer/NoGpsState'
@@ -21,7 +21,6 @@ interface ViewerMapProps {
   pinPlacingForChapter?: number
   onPinPlaced?: (chapterIndex: number, lat: number, lng: number) => void
   onCancelPinPlacing?: () => void
-  children?: ReactNode
 }
 
 export function ViewerMap({
@@ -30,7 +29,6 @@ export function ViewerMap({
   pinPlacingForChapter,
   onPinPlaced,
   onCancelPinPlacing,
-  children,
 }: ViewerMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
@@ -229,8 +227,6 @@ export function ViewerMap({
         <span className="sr-only" aria-live="polite" aria-atomic="true">
           {announcement}
         </span>
-
-        {children}
       </div>
     </div>
   )

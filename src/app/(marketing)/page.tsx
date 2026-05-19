@@ -73,20 +73,34 @@ const stats = [
   { value: '12min', label: 'avg to first draft' },
 ]
 
-// Journey pins for the world map section — positions in % of SVG viewBox (1000×500)
+// Journey pins — svgX = (lon+180)/360*1008, svgY = (90-lat)/180*504
+// Stored as % of viewBox so pins stay relative regardless of rendered size
+// x% = svgX/1008*100, y% = svgY/504*100
 const journeyPins = [
-  { id: 1, x: 46.5, y: 14, label: 'Iceland', story: 'Midnight sun on Vatnajökull. 312 photos, 3 chapters.' },
-  { id: 2, x: 68.0, y: 22, label: 'Mongolia', story: 'Steppes at dusk. 204 photos, 4 chapters.' },
-  { id: 3, x: 46.0, y: 30, label: 'Morocco', story: 'The medina before dawn. 187 photos, 2 chapters.' },
-  { id: 4, x: 74.2, y: 36, label: 'Borneo', story: 'River mist and orangutans. 421 photos, 5 chapters.' },
-  { id: 5, x: 16.0, y: 72, label: 'Patagonia', story: 'Torres del Paine in fog. 340 photos, 4 chapters.' },
-  { id: 6, x: 51.0, y: 42, label: 'Ethiopia', story: 'Lalibela at dawn. 267 photos, 3 chapters.' },
-  { id: 7, x: 87.6, y: 70, label: 'New Zealand', story: 'Fiordland in rain. 389 photos, 4 chapters.' },
-  { id: 8, x: 14.0, y: 30, label: 'Alaska', story: 'Denali in first snow. 156 photos, 2 chapters.' },
-  { id: 9, x: 62.0, y: 36, label: 'Maldives', story: 'Bioluminescence at night. 298 photos, 3 chapters.' },
-  { id: 10, x: 78.4, y: 20, label: 'Japan', story: 'Kumano Kodo in autumn. 512 photos, 6 chapters.' },
-  { id: 11, x: 13.0, y: 52, label: 'Colombia', story: 'Coffee highlands at dawn. 143 photos, 2 chapters.' },
-  { id: 12, x: 66.0, y: 14, label: 'Siberia', story: 'Lake Baikal in winter. 231 photos, 3 chapters.' },
+  // Iceland: lon=-18, lat=65  → x=45.0%, y=13.9%
+  { id: 1, x: 45.0, y: 13.9, label: 'Iceland', story: 'Midnight sun on Vatnajökull. 312 photos, 3 chapters.' },
+  // Mongolia: lon=103, lat=47 → x=78.7%, y=23.9%
+  { id: 2, x: 78.7, y: 23.9, label: 'Mongolia', story: 'Steppes at dusk. 204 photos, 4 chapters.' },
+  // Morocco: lon=-5, lat=32   → x=48.6%, y=32.2%
+  { id: 3, x: 48.6, y: 32.2, label: 'Morocco', story: 'The medina before dawn. 187 photos, 2 chapters.' },
+  // Borneo: lon=114, lat=1    → x=81.7%, y=49.4%
+  { id: 4, x: 81.7, y: 49.4, label: 'Borneo', story: 'River mist and orangutans. 421 photos, 5 chapters.' },
+  // Patagonia: lon=-72, lat=-51 → x=30.0%, y=78.3%
+  { id: 5, x: 30.0, y: 78.3, label: 'Patagonia', story: 'Torres del Paine in fog. 340 photos, 4 chapters.' },
+  // Ethiopia: lon=38, lat=9   → x=60.5%, y=45.0%
+  { id: 6, x: 60.5, y: 45.0, label: 'Ethiopia', story: 'Lalibela at dawn. 267 photos, 3 chapters.' },
+  // New Zealand: lon=172, lat=-41 → x=97.2%, y=72.8%
+  { id: 7, x: 97.2, y: 72.8, label: 'New Zealand', story: 'Fiordland in rain. 389 photos, 4 chapters.' },
+  // Alaska: lon=-153, lat=63  → x=7.5%, y=15.0%
+  { id: 8, x: 7.5, y: 15.0, label: 'Alaska', story: 'Denali in first snow. 156 photos, 2 chapters.' },
+  // Japan: lon=138, lat=36    → x=88.3%, y=30.0%
+  { id: 9, x: 88.3, y: 30.0, label: 'Japan', story: 'Kumano Kodo in autumn. 512 photos, 6 chapters.' },
+  // Colombia: lon=-74, lat=4  → x=29.4%, y=47.8%
+  { id: 10, x: 29.4, y: 47.8, label: 'Colombia', story: 'Coffee highlands at dawn. 143 photos, 2 chapters.' },
+  // Lake Baikal (Siberia): lon=108, lat=53 → x=80.2%, y=20.6%
+  { id: 11, x: 80.2, y: 20.6, label: 'Siberia', story: 'Lake Baikal in winter. 231 photos, 3 chapters.' },
+  // Tanzania/Kilimanjaro: lon=37, lat=-3 → x=60.3%, y=51.7%
+  { id: 12, x: 60.3, y: 51.7, label: 'Kilimanjaro', story: 'Sunrise above the clouds. 178 photos, 2 chapters.' },
 ]
 
 // ─── Page ──────────────────────────────────────────────────────────────────
@@ -649,6 +663,95 @@ function StoryChapter({ label, title, text }: { label: string; title: string; te
   )
 }
 
+// ─── Real world map — Natural Earth simplified equirectangular (180°W→180°E, 90°N→90°S)
+// viewBox "0 0 1008 504" maps lon/lat: x = (lon+180)/360*1008, y = (90-lat)/180*504
+const WORLD_PATHS = [
+  // North America (mainland)
+  "M87,72 L100,58 L115,52 L128,56 L140,50 L158,46 L170,52 L182,48 L194,54 L202,62 L210,58 L220,64 L226,74 L218,82 L224,92 L218,102 L222,112 L214,122 L206,134 L196,144 L184,154 L172,162 L162,172 L150,182 L140,190 L128,196 L118,190 L108,182 L100,172 L94,160 L92,148 L96,136 L94,124 L100,114 L104,102 L100,92 L104,82 Z",
+  // Alaska
+  "M56,64 L68,58 L80,60 L88,68 L84,76 L74,78 L62,76 Z",
+  // Greenland
+  "M222,30 L238,22 L256,20 L270,26 L276,38 L272,52 L260,60 L244,62 L232,54 L224,42 Z",
+  // Central America
+  "M148,196 L156,202 L162,210 L164,218 L158,224 L150,222 L144,214 L140,206 Z",
+  // Caribbean (Cuba approximation)
+  "M166,192 L178,188 L186,192 L182,198 L170,198 Z",
+  // South America
+  "M156,228 L172,220 L188,222 L202,230 L214,242 L222,256 L226,272 L226,290 L222,308 L214,326 L204,342 L192,356 L178,368 L164,376 L152,372 L142,360 L136,346 L132,330 L132,314 L134,298 L136,282 L138,266 L140,250 L146,238 Z",
+  // Iceland
+  "M388,54 L400,50 L410,54 L412,62 L404,68 L392,66 L386,60 Z",
+  // UK + Ireland
+  "M420,80 L428,74 L436,76 L438,84 L434,92 L424,92 L420,84 Z M412,82 L418,78 L422,82 L420,90 L412,88 Z",
+  // Iberian Peninsula
+  "M418,104 L432,98 L444,100 L448,112 L442,122 L430,126 L418,120 L414,110 Z",
+  // France
+  "M438,90 L454,86 L464,90 L466,100 L458,108 L444,110 L436,102 Z",
+  // Scandinavia + Norway
+  "M450,56 L460,44 L470,40 L482,44 L488,54 L482,64 L470,68 L458,66 Z M466,68 L474,60 L484,62 L484,72 L474,76 L466,74 Z",
+  // Germany, Benelux, central Europe
+  "M452,84 L468,78 L480,80 L482,90 L474,98 L460,100 L450,94 Z",
+  // Italy
+  "M458,100 L470,94 L478,98 L476,112 L466,124 L456,130 L450,120 L452,108 Z",
+  // Balkans + Greece
+  "M476,96 L490,92 L500,96 L504,108 L498,118 L484,118 L474,110 Z",
+  // Eastern Europe + Baltic
+  "M476,72 L494,66 L510,64 L520,70 L518,84 L508,90 L490,90 L478,82 Z",
+  // Africa (main continent)
+  "M432,148 L450,138 L468,134 L486,136 L500,142 L512,152 L520,164 L522,178 L518,194 L510,210 L500,226 L488,242 L474,256 L460,268 L446,276 L432,272 L420,260 L412,246 L406,230 L404,214 L404,198 L408,182 L414,168 L422,156 Z",
+  // Madagascar
+  "M524,234 L532,226 L540,230 L542,244 L536,254 L528,252 L522,242 Z",
+  // Arabian Peninsula
+  "M516,138 L534,128 L550,126 L562,132 L566,144 L560,156 L546,162 L532,158 L520,148 Z",
+  // Turkey
+  "M492,104 L510,98 L526,98 L534,106 L530,116 L514,120 L496,118 L490,110 Z",
+  // Russia (Europe) / Ukraine
+  "M490,72 L520,62 L548,60 L566,64 L572,74 L560,84 L538,88 L514,88 L494,82 Z",
+  // Russia (Siberia / Asia main)
+  "M548,40 L590,30 L640,24 L690,22 L736,26 L774,34 L800,44 L810,56 L800,68 L780,74 L750,76 L718,74 L686,72 L652,68 L618,64 L586,60 L560,56 Z",
+  // Kazakhstan / Central Asia
+  "M556,80 L590,72 L624,70 L650,74 L660,86 L644,96 L612,100 L578,98 L556,90 Z",
+  // Iran
+  "M548,118 L568,112 L588,112 L600,120 L600,132 L588,140 L566,142 L548,134 Z",
+  // Afghanistan / Pakistan
+  "M586,108 L606,102 L626,102 L638,110 L634,122 L618,128 L596,128 L582,120 Z",
+  // India
+  "M608,128 L628,122 L642,126 L646,140 L640,154 L626,164 L610,166 L598,156 L596,142 Z",
+  // Sri Lanka
+  "M626,168 L632,164 L636,168 L634,174 L626,174 Z",
+  // China (main)
+  "M636,80 L670,70 L706,68 L728,74 L734,86 L724,98 L704,106 L678,110 L650,110 L628,106 L618,96 L620,84 Z",
+  // Korean Peninsula
+  "M744,90 L754,84 L762,86 L762,96 L754,102 L744,98 Z",
+  // Japan (Honshu)
+  "M770,80 L782,74 L792,78 L794,88 L786,96 L774,94 Z",
+  // Japan (Kyushu/Shikoku)
+  "M760,94 L768,90 L776,94 L774,100 L766,102 Z",
+  // Indochina (SE Asia peninsula)
+  "M676,118 L694,112 L710,114 L718,126 L714,138 L702,144 L686,142 L674,132 Z",
+  // Malay Peninsula
+  "M698,144 L706,138 L714,142 L714,154 L706,162 L698,158 Z",
+  // Sumatra
+  "M700,162 L722,154 L740,154 L750,164 L744,174 L722,176 L704,172 Z",
+  // Borneo
+  "M724,160 L744,156 L760,158 L766,170 L760,182 L740,184 L724,176 Z",
+  // Java
+  "M720,178 L740,174 L754,176 L754,184 L736,186 L720,184 Z",
+  // Philippines
+  "M754,136 L762,130 L770,132 L772,142 L764,148 L756,144 Z",
+  // Australia
+  "M756,296 L784,284 L812,282 L838,286 L858,296 L870,310 L872,328 L864,346 L848,360 L828,368 L804,370 L780,364 L760,352 L746,336 L744,318 L748,304 Z",
+  // Tasmania
+  "M800,374 L810,370 L818,374 L816,382 L806,384 Z",
+  // New Zealand (North Island)
+  "M874,342 L882,334 L890,336 L892,346 L886,354 L876,352 Z",
+  // New Zealand (South Island)
+  "M876,356 L886,350 L894,352 L896,364 L888,374 L878,372 L872,364 Z",
+  // Papua New Guinea
+  "M794,222 L812,214 L830,214 L842,222 L840,232 L822,236 L804,232 Z",
+  // Morocco / NW Africa
+  "M418,130 L434,124 L442,130 L440,142 L428,146 L416,140 Z",
+]
+
 // ─── WorldMapSection ───────────────────────────────────────────────────────
 function WorldMapSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -712,110 +815,42 @@ function WorldMapSection() {
         {/* Map container */}
         <div className="relative overflow-hidden rounded-[2rem] border border-white/[0.06] bg-white/[0.015]">
 
-          {/* SVG World Map illustration */}
+          {/* SVG World Map — Natural Earth simplified, viewBox 0 0 1008 504
+              x = (lon + 180) / 360 * 1008   y = (90 - lat) / 180 * 504 */}
           <div className="relative w-full" style={{ paddingBottom: '50%' }}>
             <svg
-              viewBox="0 0 1000 500"
+              viewBox="0 0 1008 504"
               className="absolute inset-0 w-full h-full"
               aria-hidden
             >
-              {/* Subtle grid */}
               <defs>
-                <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
-                  <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                <pattern id="mapGrid" width="56" height="56" patternUnits="userSpaceOnUse">
+                  <path d="M56 0 L0 0 0 56" fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="0.5" />
                 </pattern>
-                <pattern id="gridLarge" width="100" height="100" patternUnits="userSpaceOnUse">
-                  <path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                </pattern>
-                <radialGradient id="pinGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#E5A663" stopOpacity="0.6" />
-                  <stop offset="100%" stopColor="#E5A663" stopOpacity="0" />
-                </radialGradient>
               </defs>
-              <rect width="1000" height="500" fill="url(#grid)" />
-              <rect width="1000" height="500" fill="url(#gridLarge)" />
+              <rect width="1008" height="504" fill="url(#mapGrid)" />
 
-              {/* Longitude lines */}
-              {[0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000].map(x => (
-                <line key={x} x1={x} y1="0" x2={x} y2="500" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+              {/* Latitude lines: 60N, 30N, 0 (equator), 30S, 60S */}
+              {[84, 168, 252, 336, 420].map(y => (
+                <line key={y} x1="0" y1={y} x2="1008" y2={y}
+                  stroke={y === 252 ? 'rgba(229,166,99,0.10)' : 'rgba(255,255,255,0.04)'}
+                  strokeWidth={y === 252 ? 1 : 0.5}
+                  strokeDasharray={y === 252 ? '6 10' : undefined} />
               ))}
-              {/* Latitude lines */}
-              {[0, 125, 250, 375, 500].map(y => (
-                <line key={y} x1="0" y1={y} x2="1000" y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+              {/* Longitude lines every 30° */}
+              {[84, 168, 252, 336, 420, 504, 588, 672, 756, 840, 924].map(x => (
+                <line key={x} x1={x} y1="0" x2={x} y2="504" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
               ))}
 
-              {/* Equator */}
-              <line x1="0" y1="250" x2="1000" y2="250" stroke="rgba(229,166,99,0.08)" strokeWidth="1" strokeDasharray="4 8" />
-
-              {/* Continent outlines — geographically accurate simplified paths */}
-              {/* North America */}
-              <path
-                d="M 132,58 L 148,52 L 162,55 L 178,50 L 192,54 L 200,62 L 210,60 L 218,68 L 212,78 L 220,85 L 216,95 L 222,105 L 218,118 L 208,128 L 198,138 L 188,148 L 178,160 L 168,170 L 158,180 L 148,192 L 140,200 L 130,208 L 120,202 L 112,195 L 105,185 L 100,175 L 96,162 L 100,150 L 98,138 L 104,128 L 108,118 L 105,108 L 110,98 L 115,88 L 120,78 L 126,68 Z"
-                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
-              {/* Central America / Caribbean connector */}
-              <path
-                d="M 140,200 L 148,210 L 152,218 L 156,226 L 154,232 L 148,236 L 144,230 L 140,222 L 136,214 L 138,206 Z"
-                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
-              {/* South America */}
-              <path
-                d="M 152,238 L 168,232 L 182,236 L 196,244 L 208,254 L 216,266 L 220,280 L 222,294 L 218,310 L 210,324 L 200,338 L 190,352 L 178,362 L 166,370 L 155,374 L 145,368 L 138,356 L 134,342 L 132,328 L 134,314 L 136,300 L 136,286 L 138,272 L 140,258 L 144,246 Z"
-                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
-              {/* Greenland */}
-              <path
-                d="M 230,30 L 248,26 L 262,30 L 268,42 L 264,54 L 252,60 L 238,56 L 228,46 Z"
-                fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-              {/* Europe */}
-              <path
-                d="M 452,72 L 462,66 L 474,64 L 486,66 L 496,72 L 504,80 L 508,90 L 512,100 L 508,110 L 500,116 L 492,122 L 480,126 L 468,124 L 458,118 L 450,110 L 446,100 L 446,90 L 448,80 Z M 462,66 L 468,58 L 478,54 L 486,56 L 492,62 L 490,68 L 480,70 L 470,68 Z M 488,80 L 498,74 L 506,76 L 510,84 L 504,88 L 496,86 Z"
-                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
-              {/* Scandinavia */}
-              <path
-                d="M 464,52 L 472,44 L 482,42 L 490,46 L 492,54 L 488,60 L 480,62 L 472,60 Z M 456,50 L 462,42 L 468,42 L 470,48 L 466,52 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
-              {/* Africa */}
-              <path
-                d="M 454,138 L 468,130 L 484,128 L 498,130 L 510,136 L 520,146 L 526,158 L 528,172 L 526,188 L 522,204 L 516,220 L 508,236 L 498,252 L 486,266 L 474,276 L 462,282 L 450,278 L 440,268 L 432,254 L 426,238 L 422,222 L 420,206 L 420,190 L 422,174 L 426,160 L 432,148 L 440,140 Z"
-                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
-              {/* Madagascar */}
-              <path
-                d="M 536,222 L 542,216 L 548,220 L 550,230 L 546,240 L 540,244 L 534,240 L 532,230 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-              {/* Middle East / Arabia */}
-              <path
-                d="M 530,128 L 546,122 L 560,120 L 572,124 L 578,134 L 576,146 L 568,154 L 556,158 L 544,154 L 534,146 L 528,136 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
-              {/* Asia (main body) */}
-              <path
-                d="M 512,72 L 530,64 L 550,60 L 572,58 L 596,56 L 622,54 L 648,52 L 672,54 L 694,58 L 714,64 L 730,72 L 742,82 L 748,94 L 746,106 L 738,116 L 724,124 L 708,130 L 692,134 L 674,136 L 656,136 L 638,132 L 620,128 L 602,124 L 584,122 L 568,122 L 554,126 L 542,132 L 532,124 L 522,114 L 514,104 L 510,92 Z"
-                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
-              {/* Indian Subcontinent */}
-              <path
-                d="M 598,134 L 614,130 L 628,132 L 638,140 L 642,152 L 638,164 L 628,172 L 616,176 L 604,172 L 596,162 L 594,150 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
-              {/* Southeast Asia */}
-              <path
-                d="M 700,138 L 716,132 L 730,130 L 742,134 L 750,142 L 752,152 L 746,160 L 734,164 L 720,162 L 708,156 L 700,148 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
-              {/* Japan */}
-              <path
-                d="M 776,80 L 782,74 L 790,76 L 794,84 L 790,92 L 782,94 L 776,88 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-              {/* Indonesia / Philippines (islands) */}
-              <path
-                d="M 724,168 L 732,164 L 740,166 L 746,172 L 744,180 L 736,184 L 728,180 L 722,174 Z M 750,162 L 758,158 L 766,160 L 770,166 L 766,172 L 758,174 L 752,170 Z M 712,178 L 720,174 L 728,176 L 730,184 L 724,190 L 716,188 Z"
-                fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-              {/* Australia */}
-              <path
-                d="M 756,296 L 778,288 L 800,288 L 820,292 L 838,300 L 850,312 L 856,326 L 854,342 L 846,356 L 832,366 L 816,372 L 798,374 L 780,370 L 764,360 L 752,346 L 746,330 L 746,314 L 750,302 Z"
-                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
-              {/* New Zealand */}
-              <path
-                d="M 870,346 L 876,340 L 882,342 L 884,350 L 880,358 L 874,358 L 870,352 Z M 876,360 L 882,354 L 888,356 L 890,364 L 886,372 L 880,372 L 876,366 Z"
-                fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
-              {/* UK / Ireland */}
-              <path
-                d="M 446,68 L 452,62 L 458,64 L 458,72 L 452,76 L 446,72 Z M 438,70 L 444,66 L 448,70 L 446,76 L 440,76 Z"
-                fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
+              {/* ── Land masses (Natural Earth simplified equirectangular) ── */}
+              {WORLD_PATHS.map((d, i) => (
+                <path key={i} d={d}
+                  fill="rgba(255,255,255,0.055)"
+                  stroke="rgba(255,255,255,0.18)"
+                  strokeWidth="0.8"
+                  strokeLinejoin="round"
+                />
+              ))}
             </svg>
 
             {/* Journey pins */}
