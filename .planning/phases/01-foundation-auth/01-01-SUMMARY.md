@@ -77,7 +77,7 @@ decisions:
 metrics:
   duration: "~9 hours (overnight run)"
   completed: "2026-05-17"
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
   files_created: 19
   files_modified: 1

@@ -3,22 +3,72 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Trailfilm MVP
 status: executing
-last_updated: "2026-05-18T14:00:00.000Z"
+last_updated: "2026-05-19T02:30:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 17
+  completed_plans: 17
   percent: 40
 ---
 
 ## Current Position
 
 Phase: 3 — AI Story Generation
-Status: Not started
-Resume file: None
+Status: Phase 3 human verification approved; advancing to code review gate
+Resume file: .planning/phases/03-ai-story-generation/03-REVIEW.md
 
 ## Session Log
+
+### 2026-05-19
+
+**Phase 3 Wave 1 executed by Codex** - Completed foundational setup for AI story generation:
+
+- Plan 03-01: Gemini integration library created (`src/lib/gemini/client.ts`, `prompts.ts`, `generateStory.ts`, `src/types/gemini.ts`)
+- Gemini model set to `gemini-2.5-flash`; JSON response mode enabled; Edge-safe base64 loop used; no Node-only imports
+- `GEMINI_API_KEY` verified present in `.env.local`; `.env.example` restored with placeholder keys
+- Plan 03-02: Zustand wizard store extended to `step: 1 | 2 | 3`; `selectedTone` + `setSelectedTone` added with default `cinematic`
+- `StepIndicator` extended to `Details / Photos / Tone` and `Step X of 3`
+- `globals.css` now includes `.progress-indeterminate` keyframes and reduced-motion guard
+- Verification: `npm.cmd run build` PASS after sandbox EPERM required rerun outside sandbox
+- Outputs: `03-01-SUMMARY.md`, `03-02-SUMMARY.md`
+
+**Phase 3 Plan 03-03 code complete by Codex** - Implemented API route and Wizard Step 3:
+
+- Added `POST /api/generate-story` Edge route with auth, ownership check, tone/trip validation, generating/completed/failed lifecycle, one Gemini retry, delete-then-insert `story_chapters`, and stream-close JSON response
+- Added `ToneSelector`, `ToneStep`, and `GenerationProgress` for Step 3 tone selection, Generate CTA, animated status text, CSS progress bar, and inline retry error
+- Added `/new?tripId=<id>&resume=3` support through `NewTripPage` and `TripWizard`
+- Verification: `npm.cmd run build` PASS after sandbox EPERM required rerun outside sandbox
+- Output: `03-03-SUMMARY.md`
+- Pending: human verification checkpoint from `03-03-PLAN.md`
+
+**Phase 3 Plan 03-04 complete by Codex** - Implemented trip detail story states:
+
+- Added `StorySection`, `StoryChapterBlock`, `DraftStoryCTA`, and `GeneratingStoryState`
+- `/trip/[id]` now fetches `story_chapters` for completed trips and renders draft/generating/completed story states below the photo grid
+- Generating state reuses the full `GenerationProgress` component per D-15 and poll-refreshes every 4s
+- Verification: `npm.cmd run build` PASS outside sandbox
+- Output: `03-04-SUMMARY.md`
+
+**Phase 3 Plan 03-05 code complete by Codex** - Implemented regeneration flow:
+
+- Added `RegenerationDialog` with shadcn Dialog, two-step tone select/confirm flow, local tone state, and D-15 fire-and-forget handoff
+- `TripDetailHeader` now has a completed/failed-only three-dot menu with `Change tone & regenerate`
+- Dialog does not consume stream body, does not use `TextDecoder`, and does not render a Loader2 spinner; page-level `GeneratingStoryState` owns in-flight UX
+- Verification: `npm.cmd run build` PASS outside sandbox
+- Output: `03-05-SUMMARY.md`
+- Pending: 26-step end-of-phase human verification from `03-05-PLAN.md`
+
+**`/gsd-ui-phase 3`** — Created and verified UI design contract for Phase 3 (0 revision cycles — passed on first check):
+
+- Design system: shadcn/ui carry forward, no new installs (all needed components installed in Phase 2)
+- Typography: 4 roles carry forward; tone card name = Heading role at text-base (16px); chapter title = Heading role at 24px/20px; 11px eyebrows absorbed into Caption/Micro per ROADMAP Phase 4 precedent
+- Color: #0A0A0A canvas / #161616 elevated / #E5A663 amber (per-view reserved: Wizard Step 3 uses max 4 elements; story section uses 1 at rest — amber hairline only)
+- New surfaces: Wizard Step 3 (2×2 tone selector cards, Cinematic default), Generate CTA with AnimatePresence blur text morph, CSS-keyframe indeterminate progress bar (off main thread), chapter list with useInView scroll entrance, draft/generating/completed states on /trip/[id], 2-step regeneration AlertDialog
+- Motion: EmilDesign-sourced decisions — blur(4px) crossfade on button text morph, CSS progress bar animation, whileTap scale(0.97) on tone cards, chapter blocks stagger via scroll (useInView once)
+- Copy: 28 elements defined; status phases "Reading your photos…" → "Weaving your story…" → "Almost ready…"; all voice rules held
+- 6/6 checker dimensions: 1 non-blocking FLAG ("Continue" single-word in AlertDialog Step A — established Phase 2 pattern), 5 PASS
+- Output: `.planning/phases/03-ai-story-generation/03-UI-SPEC.md`
 
 ### 2026-05-18
 

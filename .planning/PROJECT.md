@@ -12,11 +12,12 @@ Turn a camera roll into a film — the single "wow" moment when a user sees thei
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] User can sign up and log in via magic link (email, no password) — Validated in Phase 1: Foundation & Auth
+- [x] User can sign up and log in via Google OAuth — Validated in Phase 1: Foundation & Auth (D-06)
+- [x] Authenticated sessions persist across page reloads — Validated in Phase 1: Foundation & Auth (AUTH-03)
+- [x] Unauthenticated visitors are redirected to login from protected routes — Validated in Phase 1: Foundation & Auth
 
 ### Active
-
-- [ ] User can sign up and log in via magic link (email, no password)
 - [ ] User can create a trip with a name and optional destination
 - [ ] User can upload photos via drag-and-drop (batch, with compression and EXIF auto-read)
 - [ ] App auto-extracts GPS coordinates and timestamps from photo EXIF data
@@ -51,7 +52,7 @@ Turn a camera roll into a film — the single "wow" moment when a user sees thei
 
 ## Constraints
 
-- **Tech Stack (decided):** Next.js 14 App Router + TypeScript + Tailwind CSS + shadcn/ui + Framer Motion + Mapbox GL JS + Supabase (Postgres + Auth + Storage) + Gemini 1.5 Flash + Vercel deployment
+- **Tech Stack (decided):** Next.js 14 App Router + TypeScript + Tailwind CSS + shadcn/ui + Framer Motion + Mapbox GL JS + Supabase (Postgres + Auth + Storage) + Gemini 2.5 Flash + Vercel deployment
 - **Budget:** Free-tier only at MVP scale -- Supabase (500MB DB, 1GB storage), Gemini (1500 RPD), Mapbox (50k loads/month), Vercel hobby tier
 - **Network:** Design for 4G and prepaid Indian mobile connections -- client-side image compression mandatory before upload (target: <1.5MB per photo)
 - **Timeline:** ~Under 10-11 hours, Need to share working model ASAP
@@ -63,12 +64,16 @@ Turn a camera roll into a film — the single "wow" moment when a user sees thei
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Next.js 14 App Router | Built-in API routes, RSC reduces client JS, Vercel native deployment | -- Pending |
-| Supabase  | Postgres + Auth + Storage in one place, RLS for security | -- Pending |
-| Gemini 1.5 Flash over OpenAI | Free tier better for image-heavy multimodal use case | -- Pending |
+| Supabase | Postgres + Auth + Storage in one place, RLS for security | -- Pending |
+| Gemini 2.5 Flash over OpenAI | Free tier better for image-heavy multimodal use case | -- Pending |
 | Magic link auth only | Reduces friction; fits cinematic brand restraint | -- Pending |
 | No video export in MVP | Scope control; FFmpeg complexity deferred to Phase 2 | -- Pending |
 | Mapbox over Google Maps | Cinematic dark style; smooth flyTo; 50k free loads/month | -- Pending |
 | Client-side EXIF + compression | Saves storage costs; faster on slow connections | -- Pending |
+
+## Current State
+
+Phase 1 complete (2026-05-17) — Next.js 14 scaffolded, Supabase wired (schema + storage + RLS), edge middleware session refresh, magic link auth, Google OAuth, and cinematic auth UI all verified end-to-end.
 
 ## Current Milestone: v1.0 Trailfilm MVP
 
@@ -78,7 +83,7 @@ Turn a camera roll into a film — the single "wow" moment when a user sees thei
 - Magic link auth (sign up + log in, no password)
 - Trip creation (name + optional destination)
 - Photo upload (drag-and-drop, batch, EXIF auto-read, client-side compression)
-- AI story generation via Gemini 1.5 Flash (3-6 chapters, 4 tone options)
+- AI story generation via Gemini 2.5 Flash (3-6 chapters, 4 tone options)
 - Cinematic scroll-driven story viewer (photo parallax + animated narrative)
 - Animated Mapbox map tracing the trip journey between chapter locations
 - Trip dashboard (view and manage all trips)
