@@ -5,7 +5,9 @@ import { TripPhotoGrid, type PhotoForDisplay } from '@/components/trip/TripPhoto
 import { StorySection } from '@/components/trip/StorySection'
 import { DraftStoryCTA } from '@/components/trip/DraftStoryCTA'
 import { GeneratingStoryState } from '@/components/trip/GeneratingStoryState'
+import { CinematicViewer } from '@/components/viewer/CinematicViewer'
 import type { StoryChapter } from '@/types/database'
+import type { ChapterCoord } from '@/components/viewer/ViewerMap'
 
 export default async function TripDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -57,6 +59,76 @@ export default async function TripDetailPage({ params }: { params: { id: string 
     chapters = chapterRows ?? []
   }
 
+  // D-06: Build chapterCoords from first photo GPS per chapter.
+  // Pass only { chapterIndex, lat, lng } tuples — never raw photo GPS in payload.
+  let chapterCoords: ChapterCoord[] = []
+
+  if (trip.generation_status === 'completed' && chapters.length > 0) {
+    const firstPhotoIds = chapters
+      .map((ch) => ch.photo_ids?.[0])
+      .filter(Boolean) as string[]
+
+    if (firstPhotoIds.length > 0) {
+      const { data: gpsRows } = await supabase
+        .from('photos')
+        .select('id, latitude, longitude')
+        .in('id', firstPhotoIds)
+
+      // Build GPS map — filter out null coordinates
+      const gpsMap = new Map(
+        (gpsRows ?? [])
+          .filter((p) => p.latitude !== null && p.longitude !== null)
+          .map((p) => [p.id, { lat: p.latitude!, lng: p.longitude! }])
+      )
+
+      // Build chapterCoords — omit chapters whose first photo has no GPS (D-08)
+      chapterCoords = chapters
+        .map((ch) => {
+          const firstId = ch.photo_ids?.[0]
+          const gps = firstId ? gpsMap.get(firstId) : undefined
+          if (!gps) return null
+          return {
+            chapterIndex: ch.chapter_index,
+            lat: gps.lat,
+            lng: gps.lng,
+            label: ch.location_name ?? undefined,
+          }
+        })
+        .filter(Boolean) as ChapterCoord[]
+    }
+  }
+
+  // Build photoUrlByChapter — map chapter.id → public URL of chapter's first photo
+  // Derived from existing photoRows so no extra DB query; GPS never enters this map.
+  const photoRowMap = new Map(
+    (photoRows ?? []).map((p) => [p.id, p.storage_path])
+  )
+
+  const photoUrlByChapter: Record<string, string> = {}
+  for (const chapter of chapters) {
+    const firstPhotoId = chapter.photo_ids?.[0]
+    if (firstPhotoId) {
+      const storagePath = photoRowMap.get(firstPhotoId)
+      if (storagePath) {
+        photoUrlByChapter[chapter.id] = supabase.storage
+          .from('trip-photos')
+          .getPublicUrl(storagePath).data.publicUrl
+      }
+    }
+  }
+
+  // Completed trips with chapters → full cinematic viewer (replaces Phase 3 layout)
+  if (trip.generation_status === 'completed' && chapters.length > 0) {
+    return (
+      <CinematicViewer
+        chapters={chapters}
+        photoUrlByChapter={photoUrlByChapter}
+        chapterCoords={chapterCoords}
+      />
+    )
+  }
+
+  // Draft / generating / failed (and edge case: completed but 0 chapters) → Phase 3 layout unchanged
   return (
     <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 pt-8 pb-16">
       <TripDetailHeader trip={trip} />
