@@ -340,6 +340,19 @@ Plans:
 2. A person who has never used Trailfilm opens the shared URL in a private browser window and sees the full cinematic viewer without being asked to log in.
 3. The live Vercel deployment passes a full end-to-end smoke test: sign up → create trip → upload photos → generate story → view cinematic story → share URL → view as anonymous visitor.
 
+**Plans:** 4 plans
+
+Plans:
+**Wave 0** *(pre-requisite — Supabase human action)*
+- [ ] 05-01-PLAN.md — Supabase RLS policy: allow anon reads on trips WHERE is_public = true
+
+**Wave 1** *(parallel — disjoint files)*
+- [ ] 05-02-PLAN.md — Public viewer route group (public)/t/[id], TrailfilmWatermark, ArchiveCTA, CinematicViewer showNav prop, OG meta tags, middleware comment
+- [ ] 05-03-PLAN.md — TripDetailHeader visibility toggle + Copy link button, /api/trips/[id]/visibility Edge route, login private-trip message
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 05-04-PLAN.md — Vercel deployment human-action checkpoint + full end-to-end smoke test
+
 ---
 
 ## Progress
@@ -350,4 +363,4 @@ Plans:
 | 2. Trip Management & Photo Upload | 6/6 | Complete | 2026-05-18 |
 | 3. AI Story Generation | 0/5 | Planned (3 waves) | — |
 | 4. Cinematic Viewer | 3/3 | Complete — Human Verified | 2026-05-19 |
-| 5. Sharing & Deploy | 0/? | Not started | — |
+| 5. Sharing & Deploy | 0/4 | Planned (3 waves) | — |
