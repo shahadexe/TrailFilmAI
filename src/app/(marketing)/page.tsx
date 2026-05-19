@@ -68,25 +68,25 @@ const zigzagFeatures = [
 
 const stats = [
   { value: '94k', label: 'stories written' },
-  { value: '38', label: 'countries active' },
+  { value: '∞', label: 'countries to explore' },
   { value: '4.9', label: 'avg story rating' },
   { value: '12min', label: 'avg to first draft' },
 ]
 
-// Journey pins for the world map section
+// Journey pins for the world map section — positions in % of SVG viewBox (1000×500)
 const journeyPins = [
-  { id: 1, x: 22, y: 38, label: 'Iceland', story: 'Midnight sun on Vatnajökull. 312 photos, 3 chapters.' },
-  { id: 2, x: 48, y: 32, label: 'Mongolia', story: 'Steppes at dusk. 204 photos, 4 chapters.' },
-  { id: 3, x: 30, y: 52, label: 'Morocco', story: 'The medina before dawn. 187 photos, 2 chapters.' },
-  { id: 4, x: 58, y: 62, label: 'Borneo', story: 'River mist and orangutans. 421 photos, 5 chapters.' },
-  { id: 5, x: 17, y: 62, label: 'Patagonia', story: 'Torres del Paine in fog. 340 photos, 4 chapters.' },
-  { id: 6, x: 36, y: 44, label: 'Ethiopia', story: 'Lalibela at dawn. 267 photos, 3 chapters.' },
-  { id: 7, x: 72, y: 48, label: 'New Zealand', story: 'Fiordland in rain. 389 photos, 4 chapters.' },
-  { id: 8, x: 26, y: 28, label: 'Svalbard', story: 'Polar night and ice. 156 photos, 2 chapters.' },
-  { id: 9, x: 44, y: 55, label: 'Maldives', story: 'Bioluminescence at night. 298 photos, 3 chapters.' },
-  { id: 10, x: 62, y: 38, label: 'Japan', story: 'Kumano Kodo in autumn. 512 photos, 6 chapters.' },
-  { id: 11, x: 14, y: 44, label: 'Azores', story: 'Volcanic lakes at dusk. 143 photos, 2 chapters.' },
-  { id: 12, x: 52, y: 26, label: 'Siberia', story: 'Lake Baikal in winter. 231 photos, 3 chapters.' },
+  { id: 1, x: 46.5, y: 14, label: 'Iceland', story: 'Midnight sun on Vatnajökull. 312 photos, 3 chapters.' },
+  { id: 2, x: 68.0, y: 22, label: 'Mongolia', story: 'Steppes at dusk. 204 photos, 4 chapters.' },
+  { id: 3, x: 46.0, y: 30, label: 'Morocco', story: 'The medina before dawn. 187 photos, 2 chapters.' },
+  { id: 4, x: 74.2, y: 36, label: 'Borneo', story: 'River mist and orangutans. 421 photos, 5 chapters.' },
+  { id: 5, x: 16.0, y: 72, label: 'Patagonia', story: 'Torres del Paine in fog. 340 photos, 4 chapters.' },
+  { id: 6, x: 51.0, y: 42, label: 'Ethiopia', story: 'Lalibela at dawn. 267 photos, 3 chapters.' },
+  { id: 7, x: 87.6, y: 70, label: 'New Zealand', story: 'Fiordland in rain. 389 photos, 4 chapters.' },
+  { id: 8, x: 14.0, y: 30, label: 'Alaska', story: 'Denali in first snow. 156 photos, 2 chapters.' },
+  { id: 9, x: 62.0, y: 36, label: 'Maldives', story: 'Bioluminescence at night. 298 photos, 3 chapters.' },
+  { id: 10, x: 78.4, y: 20, label: 'Japan', story: 'Kumano Kodo in autumn. 512 photos, 6 chapters.' },
+  { id: 11, x: 13.0, y: 52, label: 'Colombia', story: 'Coffee highlands at dawn. 143 photos, 2 chapters.' },
+  { id: 12, x: 66.0, y: 14, label: 'Siberia', story: 'Lake Baikal in winter. 231 photos, 3 chapters.' },
 ]
 
 // ─── Page ──────────────────────────────────────────────────────────────────
@@ -471,7 +471,7 @@ export default function MarketingPage() {
                     </span>
                   </Link>
                   <p className="font-sans text-[11px] text-parchment-600">
-                    Trusted in 38 countries.
+                    Built for wherever the road takes you.
                   </p>
                 </div>
               </div>
@@ -747,28 +747,75 @@ function WorldMapSection() {
               {/* Equator */}
               <line x1="0" y1="250" x2="1000" y2="250" stroke="rgba(229,166,99,0.08)" strokeWidth="1" strokeDasharray="4 8" />
 
-              {/* Continent outlines — simplified abstract shapes */}
+              {/* Continent outlines — geographically accurate simplified paths */}
               {/* North America */}
-              <path d="M 80,80 L 200,70 L 240,110 L 230,160 L 200,200 L 160,230 L 120,240 L 90,200 L 70,150 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+              <path
+                d="M 132,58 L 148,52 L 162,55 L 178,50 L 192,54 L 200,62 L 210,60 L 218,68 L 212,78 L 220,85 L 216,95 L 222,105 L 218,118 L 208,128 L 198,138 L 188,148 L 178,160 L 168,170 L 158,180 L 148,192 L 140,200 L 130,208 L 120,202 L 112,195 L 105,185 L 100,175 L 96,162 L 100,150 L 98,138 L 104,128 L 108,118 L 105,108 L 110,98 L 115,88 L 120,78 L 126,68 Z"
+                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
+              {/* Central America / Caribbean connector */}
+              <path
+                d="M 140,200 L 148,210 L 152,218 L 156,226 L 154,232 L 148,236 L 144,230 L 140,222 L 136,214 L 138,206 Z"
+                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
               {/* South America */}
-              <path d="M 170,260 L 230,250 L 250,290 L 240,360 L 200,420 L 160,410 L 145,350 L 150,290 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+              <path
+                d="M 152,238 L 168,232 L 182,236 L 196,244 L 208,254 L 216,266 L 220,280 L 222,294 L 218,310 L 210,324 L 200,338 L 190,352 L 178,362 L 166,370 L 155,374 L 145,368 L 138,356 L 134,342 L 132,328 L 134,314 L 136,300 L 136,286 L 138,272 L 140,258 L 144,246 Z"
+                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
+              {/* Greenland */}
+              <path
+                d="M 230,30 L 248,26 L 262,30 L 268,42 L 264,54 L 252,60 L 238,56 L 228,46 Z"
+                fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
               {/* Europe */}
-              <path d="M 420,60 L 510,55 L 540,90 L 520,130 L 480,140 L 440,130 L 420,100 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+              <path
+                d="M 452,72 L 462,66 L 474,64 L 486,66 L 496,72 L 504,80 L 508,90 L 512,100 L 508,110 L 500,116 L 492,122 L 480,126 L 468,124 L 458,118 L 450,110 L 446,100 L 446,90 L 448,80 Z M 462,66 L 468,58 L 478,54 L 486,56 L 492,62 L 490,68 L 480,70 L 470,68 Z M 488,80 L 498,74 L 506,76 L 510,84 L 504,88 L 496,86 Z"
+                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
+              {/* Scandinavia */}
+              <path
+                d="M 464,52 L 472,44 L 482,42 L 490,46 L 492,54 L 488,60 L 480,62 L 472,60 Z M 456,50 L 462,42 L 468,42 L 470,48 L 466,52 Z"
+                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
               {/* Africa */}
-              <path d="M 430,155 L 530,145 L 560,200 L 550,310 L 500,390 L 450,390 L 410,310 L 400,220 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
-              {/* Asia */}
-              <path d="M 540,55 L 780,50 L 820,100 L 800,180 L 720,200 L 640,190 L 580,160 L 540,120 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
-              {/* Southeast Asia / Oceania */}
-              <path d="M 720,210 L 810,200 L 850,240 L 840,280 L 790,290 L 740,270 L 720,245 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+              <path
+                d="M 454,138 L 468,130 L 484,128 L 498,130 L 510,136 L 520,146 L 526,158 L 528,172 L 526,188 L 522,204 L 516,220 L 508,236 L 498,252 L 486,266 L 474,276 L 462,282 L 450,278 L 440,268 L 432,254 L 426,238 L 422,222 L 420,206 L 420,190 L 422,174 L 426,160 L 432,148 L 440,140 Z"
+                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
+              {/* Madagascar */}
+              <path
+                d="M 536,222 L 542,216 L 548,220 L 550,230 L 546,240 L 540,244 L 534,240 L 532,230 Z"
+                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
+              {/* Middle East / Arabia */}
+              <path
+                d="M 530,128 L 546,122 L 560,120 L 572,124 L 578,134 L 576,146 L 568,154 L 556,158 L 544,154 L 534,146 L 528,136 Z"
+                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
+              {/* Asia (main body) */}
+              <path
+                d="M 512,72 L 530,64 L 550,60 L 572,58 L 596,56 L 622,54 L 648,52 L 672,54 L 694,58 L 714,64 L 730,72 L 742,82 L 748,94 L 746,106 L 738,116 L 724,124 L 708,130 L 692,134 L 674,136 L 656,136 L 638,132 L 620,128 L 602,124 L 584,122 L 568,122 L 554,126 L 542,132 L 532,124 L 522,114 L 514,104 L 510,92 Z"
+                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
+              {/* Indian Subcontinent */}
+              <path
+                d="M 598,134 L 614,130 L 628,132 L 638,140 L 642,152 L 638,164 L 628,172 L 616,176 L 604,172 L 596,162 L 594,150 Z"
+                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
+              {/* Southeast Asia */}
+              <path
+                d="M 700,138 L 716,132 L 730,130 L 742,134 L 750,142 L 752,152 L 746,160 L 734,164 L 720,162 L 708,156 L 700,148 Z"
+                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" />
+              {/* Japan */}
+              <path
+                d="M 776,80 L 782,74 L 790,76 L 794,84 L 790,92 L 782,94 L 776,88 Z"
+                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
+              {/* Indonesia / Philippines (islands) */}
+              <path
+                d="M 724,168 L 732,164 L 740,166 L 746,172 L 744,180 L 736,184 L 728,180 L 722,174 Z M 750,162 L 758,158 L 766,160 L 770,166 L 766,172 L 758,174 L 752,170 Z M 712,178 L 720,174 L 728,176 L 730,184 L 724,190 L 716,188 Z"
+                fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
               {/* Australia */}
-              <path d="M 740,320 L 850,310 L 880,360 L 860,420 L 800,440 L 740,420 L 720,370 Z"
-                fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+              <path
+                d="M 756,296 L 778,288 L 800,288 L 820,292 L 838,300 L 850,312 L 856,326 L 854,342 L 846,356 L 832,366 L 816,372 L 798,374 L 780,370 L 764,360 L 752,346 L 746,330 L 746,314 L 750,302 Z"
+                fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.09)" strokeWidth="0.8" />
+              {/* New Zealand */}
+              <path
+                d="M 870,346 L 876,340 L 882,342 L 884,350 L 880,358 L 874,358 L 870,352 Z M 876,360 L 882,354 L 888,356 L 890,364 L 886,372 L 880,372 L 876,366 Z"
+                fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
+              {/* UK / Ireland */}
+              <path
+                d="M 446,68 L 452,62 L 458,64 L 458,72 L 452,76 L 446,72 Z M 438,70 L 444,66 L 448,70 L 446,76 L 440,76 Z"
+                fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
             </svg>
 
             {/* Journey pins */}

@@ -98,22 +98,31 @@ export default async function TripDetailPage({ params }: { params: { id: string 
     }
   }
 
-  // Build photoUrlByChapter — map chapter.id → public URL of chapter's first photo
-  // Derived from existing photoRows so no extra DB query; GPS never enters this map.
+  // Build photoUrlByChapter — map chapter.id → public URL of chapter's first photo (backdrop)
+  // Also build allPhotoUrlsByChapter — all photo URLs per chapter (for thumbnail strip)
   const photoRowMap = new Map(
     (photoRows ?? []).map((p) => [p.id, p.storage_path])
   )
 
   const photoUrlByChapter: Record<string, string> = {}
+  const allPhotoUrlsByChapter: Record<string, string[]> = {}
+
   for (const chapter of chapters) {
-    const firstPhotoId = chapter.photo_ids?.[0]
-    if (firstPhotoId) {
-      const storagePath = photoRowMap.get(firstPhotoId)
+    const photoIds = chapter.photo_ids ?? []
+    const urls: string[] = []
+
+    for (const pid of photoIds) {
+      const storagePath = photoRowMap.get(pid)
       if (storagePath) {
-        photoUrlByChapter[chapter.id] = supabase.storage
-          .from('trip-photos')
-          .getPublicUrl(storagePath).data.publicUrl
+        urls.push(
+          supabase.storage.from('trip-photos').getPublicUrl(storagePath).data.publicUrl
+        )
       }
+    }
+
+    if (urls.length > 0) {
+      photoUrlByChapter[chapter.id] = urls[0]
+      allPhotoUrlsByChapter[chapter.id] = urls
     }
   }
 
@@ -123,7 +132,11 @@ export default async function TripDetailPage({ params }: { params: { id: string 
       <CinematicViewer
         chapters={chapters}
         photoUrlByChapter={photoUrlByChapter}
+        allPhotoUrlsByChapter={allPhotoUrlsByChapter}
         chapterCoords={chapterCoords}
+        tripId={trip.id}
+        userId={user.id}
+        allPhotos={photos}
       />
     )
   }

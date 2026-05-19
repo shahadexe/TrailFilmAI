@@ -15,6 +15,7 @@ interface ChapterSectionProps {
   chapter: StoryChapter
   chapterIndex: number
   photoUrl: string
+  allPhotoUrls?: string[]
   onInView?: (chapterIndex: number) => void
 }
 
@@ -32,6 +33,7 @@ export function ChapterSection({
   chapter,
   chapterIndex,
   photoUrl,
+  allPhotoUrls = [],
   onInView,
 }: ChapterSectionProps) {
   const sectionRef = useRef<HTMLElement>(null)
@@ -94,13 +96,18 @@ export function ChapterSection({
         />
       </motion.div>
 
-      {/* Gradient overlays — CSS classes already in globals.css */}
+      {/* Gradient overlays */}
       <div
         className="gradient-fade-top absolute inset-x-0 top-0 h-[30%] z-[5]"
         aria-hidden="true"
       />
+      {/* Deeper bottom gradient so text is always readable over photos */}
       <div
-        className="gradient-fade-bottom absolute inset-x-0 bottom-0 h-[60%] z-[5]"
+        className="absolute inset-x-0 bottom-0 h-[75%] z-[5]"
+        style={{
+          background:
+            'linear-gradient(to bottom, transparent 0%, rgba(10,10,10,0.55) 30%, rgba(10,10,10,0.88) 58%, rgba(10,10,10,0.97) 78%, rgba(10,10,10,1) 100%)',
+        }}
         aria-hidden="true"
       />
 
@@ -140,6 +147,30 @@ export function ChapterSection({
             {chapter.narrative}
           </motion.p>
         </motion.div>
+
+        {/* Horizontal photo strip — all photos assigned to this chapter */}
+        {allPhotoUrls.length > 1 && (
+          <div
+            className="mt-5 flex gap-2 overflow-x-auto pb-1"
+            style={{ scrollbarWidth: 'none' }}
+            aria-label={`${allPhotoUrls.length} photos in this chapter`}
+          >
+            {allPhotoUrls.map((url, i) => (
+              <div
+                key={url + i}
+                className="relative flex-shrink-0 h-16 w-16 rounded-md overflow-hidden ring-1 ring-white/10"
+              >
+                <Image
+                  src={url}
+                  alt={`Chapter ${chapterIndex + 1} photo ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="64px"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </motion.div>
     </section>
   )

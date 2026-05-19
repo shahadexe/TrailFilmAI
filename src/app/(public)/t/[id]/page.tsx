@@ -139,21 +139,30 @@ export default async function PublicViewerPage({ params }: { params: { id: strin
     }
   }
 
-  // Build photoUrlByChapter — map chapter.id → public URL of chapter's first photo
+  // Build photoUrlByChapter and allPhotoUrlsByChapter
   const photoRowMap = new Map(
     (photoRows ?? []).map((p) => [p.id, p.storage_path])
   )
 
   const photoUrlByChapter: Record<string, string> = {}
+  const allPhotoUrlsByChapter: Record<string, string[]> = {}
+
   for (const chapter of chapters) {
-    const firstPhotoId = chapter.photo_ids?.[0]
-    if (firstPhotoId) {
-      const storagePath = photoRowMap.get(firstPhotoId)
+    const photoIds = chapter.photo_ids ?? []
+    const urls: string[] = []
+
+    for (const pid of photoIds) {
+      const storagePath = photoRowMap.get(pid)
       if (storagePath) {
-        photoUrlByChapter[chapter.id] = supabase.storage
-          .from('trip-photos')
-          .getPublicUrl(storagePath).data.publicUrl
+        urls.push(
+          supabase.storage.from('trip-photos').getPublicUrl(storagePath).data.publicUrl
+        )
       }
+    }
+
+    if (urls.length > 0) {
+      photoUrlByChapter[chapter.id] = urls[0]
+      allPhotoUrlsByChapter[chapter.id] = urls
     }
   }
 
@@ -163,6 +172,7 @@ export default async function PublicViewerPage({ params }: { params: { id: strin
       <CinematicViewer
         chapters={chapters}
         photoUrlByChapter={photoUrlByChapter}
+        allPhotoUrlsByChapter={allPhotoUrlsByChapter}
         chapterCoords={chapterCoords}
         showNav={false}
       />
