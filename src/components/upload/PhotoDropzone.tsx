@@ -1,7 +1,8 @@
 'use client'
 
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { Upload } from 'lucide-react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { Images } from 'lucide-react'
 
 // Client-side MIME filter — reduces UX friction by rejecting obviously wrong file types early.
 // Server-side enforcement is via Supabase bucket MIME restriction policy (Phase 1).
@@ -20,8 +21,8 @@ export function PhotoDropzone({ existingCount, onFilesAccepted, disabled = false
   const [isDragOver, setIsDragOver] = useState(false)
   const [rejectMessage, setRejectMessage] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const shouldReduce = useReducedMotion()
 
-  // Auto-dismiss reject message after 4 seconds
   useEffect(() => {
     if (!rejectMessage) return
     const id = setTimeout(() => setRejectMessage(null), 4000)
@@ -56,31 +57,30 @@ export function PhotoDropzone({ existingCount, onFilesAccepted, disabled = false
     [existingCount, onFilesAccepted]
   )
 
+  const remaining = MAX_PHOTOS - existingCount
+
   return (
-    <div className="flex flex-col gap-3">
-      <div
+    <div className="flex flex-col gap-2">
+      <motion.div
         role="button"
         tabIndex={disabled ? -1 : 0}
         aria-disabled={disabled}
         aria-label="Add photos — drop here or press to open file picker"
-        className={[
-          'flex min-h-[240px] flex-col items-center justify-center gap-3 rounded-md bg-ink-800 cursor-pointer transition-colors duration-150 ease-trailfilm',
+        animate={
           isDragOver
-            ? 'border-2 border-solid border-amber-accent bg-[rgba(229,166,99,0.06)]'
-            : 'border-2 border-dashed border-ink-500',
-          disabled ? 'opacity-50 cursor-not-allowed' : '',
+            ? { borderColor: 'rgba(229,166,99,0.6)', backgroundColor: 'rgba(229,166,99,0.04)' }
+            : { borderColor: 'rgba(255,255,255,0.07)', backgroundColor: 'rgba(13,13,13,0.6)' }
+        }
+        transition={{ duration: shouldReduce ? 0 : 0.2 }}
+        className={[
+          'flex min-h-[220px] flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed cursor-pointer select-none',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink',
+          disabled ? 'pointer-events-none opacity-40' : 'hover:border-[rgba(255,255,255,0.14)]',
         ]
           .filter(Boolean)
           .join(' ')}
-        onDragEnter={(e) => {
-          e.preventDefault()
-          setIsDragOver(true)
-        }}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setIsDragOver(true)
-        }}
+        onDragEnter={(e) => { e.preventDefault(); setIsDragOver(true) }}
+        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
         onDragLeave={() => setIsDragOver(false)}
         onDrop={(e) => {
           e.preventDefault()
@@ -95,11 +95,47 @@ export function PhotoDropzone({ existingCount, onFilesAccepted, disabled = false
           }
         }}
       >
-        <Upload className="h-8 w-8 text-parchment-400" aria-hidden="true" />
-        <p className="font-sans text-sm font-medium text-parchment-400">Drop photos here</p>
-        <p className="font-sans text-xs font-medium uppercase tracking-[0.05em] text-parchment-600">
-          JPEG · PNG · WebP · up to 12 files
-        </p>
+        {/* Concentric ring pulse on drag-over */}
+        {isDragOver && !shouldReduce && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden rounded-xl" aria-hidden>
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="absolute rounded-full border border-amber-accent/30"
+                style={{
+                  width:  '40%',
+                  height: '40%',
+                  animation: 'expand-ring 1.7s ease-out infinite',
+                  animationDelay: `${i * 0.38}s`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Icon */}
+        <motion.div
+          animate={isDragOver ? { scale: shouldReduce ? 1 : 1.1, y: shouldReduce ? 0 : -2 } : { scale: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.04)]"
+        >
+          <Images
+            aria-hidden
+            className={`h-5 w-5 transition-colors duration-200 ${isDragOver ? 'text-amber-accent' : 'text-parchment-600'}`}
+          />
+        </motion.div>
+
+        {/* Copy */}
+        <div className="flex flex-col items-center gap-1 text-center">
+          <p className={`font-sans text-[14px] font-medium transition-colors duration-200 ${isDragOver ? 'text-amber-accent' : 'text-parchment-400'}`}>
+            {isDragOver ? 'Drop to add photos' : 'Drop photos here'}
+          </p>
+          <p className="font-sans text-[11px] uppercase tracking-[0.1em] text-parchment-600/60">
+            JPEG · PNG · WebP
+            {remaining < MAX_PHOTOS && ` · ${remaining} remaining`}
+          </p>
+        </div>
+
         <input
           ref={inputRef}
           type="file"
@@ -108,15 +144,25 @@ export function PhotoDropzone({ existingCount, onFilesAccepted, disabled = false
           className="sr-only"
           onChange={(e) => {
             handleFiles(e.target.files ?? new DataTransfer().files)
-            e.target.value = '' // allow re-selecting same file
+            e.target.value = ''
           }}
         />
-      </div>
-      {rejectMessage && (
-        <p role="alert" className="font-sans text-sm text-error">
-          {rejectMessage}
-        </p>
-      )}
+      </motion.div>
+
+      <AnimatePresence>
+        {rejectMessage && (
+          <motion.p
+            role="alert"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="font-sans text-[13px] text-error"
+          >
+            {rejectMessage}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

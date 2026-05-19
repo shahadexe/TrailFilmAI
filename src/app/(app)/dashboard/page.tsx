@@ -14,23 +14,45 @@ export default async function DashboardPage() {
   // and page auth calls (token refresh timing, clock skew).
   if (!user) redirect('/login')
 
-  const { data: rows } = await supabase
+  const { data: rows, error: tripsError } = await supabase
     .from('trips')
-    .select('*, cover:photos!cover_photo_id(id, storage_path)')
+    .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  const trips = (rows ?? []).map(
-    (row: Trip & { cover: { storage_path: string } | null }) => {
-      const coverUrl = row.cover
-        ? supabase.storage
-            .from('trip-photos')
-            .getPublicUrl(row.cover.storage_path).data.publicUrl
-        : null
-      const { cover: _cover, ...trip } = row
-      return { trip: trip as Trip, coverUrl }
+  if (tripsError) {
+    console.error('[dashboard] trips query failed:', tripsError)
+  }
+
+  const tripRows = rows ?? []
+
+  // Fetch cover photo storage paths for trips that have a cover_photo_id
+  const coverPhotoIds = tripRows
+    .map((r) => r.cover_photo_id)
+    .filter(Boolean) as string[]
+
+  const coverMap: Record<string, string> = {}
+  if (coverPhotoIds.length > 0) {
+    const { data: coverPhotos, error: coverError } = await supabase
+      .from('photos')
+      .select('id, storage_path')
+      .in('id', coverPhotoIds)
+
+    if (coverError) {
+      console.error('[dashboard] cover photos query failed:', coverError)
     }
-  )
+
+    for (const photo of coverPhotos ?? []) {
+      coverMap[photo.id] = supabase.storage
+        .from('trip-photos')
+        .getPublicUrl(photo.storage_path).data.publicUrl
+    }
+  }
+
+  const trips = tripRows.map((row: Trip) => ({
+    trip: row,
+    coverUrl: row.cover_photo_id ? (coverMap[row.cover_photo_id] ?? null) : null,
+  }))
 
   const count = trips.length
 

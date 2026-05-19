@@ -10,7 +10,6 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/client'
 import { createTrip } from '@/lib/trips/mutations'
 import { useTripCreationStore } from '@/stores/trip-creation'
-import { Label } from '@/components/ui/label'
 
 const TripDetailsSchema = z.object({
   title: z
@@ -27,12 +26,14 @@ const TripDetailsSchema = z.object({
 })
 
 type TripDetailsValues = z.infer<typeof TripDetailsSchema>
-
 type FormState = 'idle' | 'submitting'
 
 interface TripDetailsFormProps {
   userId: string
 }
+
+const inputBase =
+  'w-full rounded-xl border bg-[#0D0D0D] px-4 py-3 font-sans text-[15px] text-ink-50 placeholder:text-parchment-600/60 transition-all duration-300 ease-trailfilm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-accent/35 focus-visible:border-amber-accent/55 focus-visible:shadow-[0_0_0_4px_rgba(229,166,99,0.07),0_0_20px_-8px_rgba(229,166,99,0.2)] disabled:opacity-40 disabled:cursor-not-allowed'
 
 export function TripDetailsForm({ userId }: TripDetailsFormProps) {
   const [state, setState] = useState<FormState>('idle')
@@ -81,20 +82,21 @@ export function TripDetailsForm({ userId }: TripDetailsFormProps) {
       className="flex flex-col gap-6"
       aria-busy={state === 'submitting'}
     >
-      <div className="flex flex-col gap-3">
+      {/* Heading */}
+      <div className="flex flex-col gap-2">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={t(0.8)}
-          className="font-serif text-[28px] md:text-[40px] font-medium leading-[1.15] tracking-[-0.01em] text-ink-50"
+          className="font-serif text-[28px] font-medium leading-[1.15] tracking-[-0.01em] text-ink-50 md:text-[36px]"
         >
           Name your trip.
         </motion.h2>
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={t(0.8, 0.15)}
-          className="font-sans text-base text-parchment-200"
+          transition={t(0.8, 0.12)}
+          className="font-sans text-[14px] text-parchment-400 leading-relaxed"
         >
           Give it a name. Where did it take you?
         </motion.p>
@@ -102,14 +104,14 @@ export function TripDetailsForm({ userId }: TripDetailsFormProps) {
 
       {/* Title field */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={t(0.8, 0.15)}
-        className="flex flex-col gap-2"
+        transition={t(0.8, 0.18)}
+        className="flex flex-col gap-1.5"
       >
-        <Label htmlFor="trip-title" className="font-sans text-sm font-medium text-ink-50">
+        <label htmlFor="trip-title" className="font-sans text-[12px] font-medium uppercase tracking-[0.1em] text-parchment-600">
           Trip name
-        </Label>
+        </label>
         <input
           id="trip-title"
           type="text"
@@ -118,13 +120,11 @@ export function TripDetailsForm({ userId }: TripDetailsFormProps) {
           disabled={state === 'submitting'}
           aria-invalid={!!errors.title}
           aria-describedby={errors.title ? 'trip-title-error' : undefined}
-          className={`w-full bg-ink-800 border rounded-md px-4 py-3 font-sans text-base text-ink-50 placeholder:text-parchment-600 transition-colors duration-300 ease-trailfilm focus-visible:outline-none focus-visible:border-amber-accent focus-visible:ring-2 focus-visible:ring-amber-accent/30 ${
-            errors.title ? 'border-error' : 'border-ink-700'
-          }`}
+          className={`${inputBase} ${errors.title ? 'border-error/60' : 'border-[rgba(255,255,255,0.07)]'}`}
           {...register('title')}
         />
         {errors.title && (
-          <p id="trip-title-error" role="alert" className="font-sans text-sm text-error">
+          <p id="trip-title-error" role="alert" className="font-sans text-[13px] text-error">
             {errors.title.message}
           </p>
         )}
@@ -132,18 +132,18 @@ export function TripDetailsForm({ userId }: TripDetailsFormProps) {
 
       {/* Destination field */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={t(0.8, 0.15)}
-        className="flex flex-col gap-2"
+        transition={t(0.8, 0.24)}
+        className="flex flex-col gap-1.5"
       >
-        <Label
+        <label
           htmlFor="trip-destination"
-          className="font-sans text-sm font-medium text-ink-50 flex items-center gap-2"
+          className="flex items-center gap-2 font-sans text-[12px] font-medium uppercase tracking-[0.1em] text-parchment-600"
         >
           <span>Destination</span>
-          <span className="font-normal text-xs text-parchment-400">(optional)</span>
-        </Label>
+          <span className="normal-case tracking-normal text-parchment-600/50">optional</span>
+        </label>
         <input
           id="trip-destination"
           type="text"
@@ -152,35 +152,33 @@ export function TripDetailsForm({ userId }: TripDetailsFormProps) {
           disabled={state === 'submitting'}
           aria-invalid={!!errors.destination}
           aria-describedby={errors.destination ? 'trip-destination-error' : undefined}
-          className={`w-full bg-ink-800 border rounded-md px-4 py-3 font-sans text-base text-ink-50 placeholder:text-parchment-600 transition-colors duration-300 ease-trailfilm focus-visible:outline-none focus-visible:border-amber-accent focus-visible:ring-2 focus-visible:ring-amber-accent/30 ${
-            errors.destination ? 'border-error' : 'border-ink-700'
-          }`}
+          className={`${inputBase} ${errors.destination ? 'border-error/60' : 'border-[rgba(255,255,255,0.07)]'}`}
           {...register('destination')}
         />
         {errors.destination && (
-          <p id="trip-destination-error" role="alert" className="font-sans text-sm text-error">
+          <p id="trip-destination-error" role="alert" className="font-sans text-[13px] text-error">
             {errors.destination.message}
           </p>
         )}
       </motion.div>
 
-      {/* Submit button */}
+      {/* Submit */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={t(0.6, 0.3)}
+        transition={t(0.6, 0.32)}
       >
         <button
           type="submit"
           disabled={state === 'submitting'}
           aria-disabled={state === 'submitting'}
           aria-busy={state === 'submitting'}
-          className="w-full min-h-[44px] rounded-md bg-amber-accent px-8 py-4 font-sans text-sm font-medium text-ink transition-all duration-300 ease-trailfilm hover:-translate-y-px hover:bg-[#FFC881] active:translate-y-px active:bg-[#B07F40] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          className="w-full min-h-[46px] rounded-xl bg-amber-accent px-8 py-3 font-sans text-sm font-medium text-ink transition-all duration-300 ease-trailfilm hover:-translate-y-0.5 hover:bg-[#FFC881] hover:shadow-[0_8px_24px_-6px_rgba(229,166,99,0.4)] active:scale-[0.98] active:translate-y-0 active:bg-[#B07F40] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
           {state === 'submitting' ? (
             <Loader2 className="h-4 w-4 animate-spin mx-auto" aria-label="Creating trip" />
           ) : (
-            <span>Continue</span>
+            'Continue'
           )}
         </button>
       </motion.div>
