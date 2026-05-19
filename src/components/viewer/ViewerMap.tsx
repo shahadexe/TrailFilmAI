@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { NoGpsState } from '@/components/viewer/NoGpsState'
@@ -22,6 +22,7 @@ interface ViewerMapProps {
 export function ViewerMap({ chapterCoords, activeChapterIndex }: ViewerMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
+  const [announcement, setAnnouncement] = useState('')
 
   // Effect 1 — map initialization (mount once)
   useEffect(() => {
@@ -139,6 +140,10 @@ export function ViewerMap({ chapterCoords, activeChapterIndex }: ViewerMapProps)
       duration: 1500,
       essential: true, // spatial navigation — NOT gated on useReducedMotion
     })
+
+    // Announce map movement to screen readers
+    const label = coord.label ?? `Chapter ${activeChapterIndex + 1}`
+    setAnnouncement(`Map moved to ${label}`)
   }, [activeChapterIndex, chapterCoords])
 
   return (
@@ -160,6 +165,14 @@ export function ViewerMap({ chapterCoords, activeChapterIndex }: ViewerMapProps)
       <div className="relative w-full h-full">
         <div ref={mapContainer} className="absolute inset-0" />
         {chapterCoords.length === 0 && <NoGpsState />}
+        {/* Visually hidden live region — announces chapter map transitions to screen readers */}
+        <span
+          className="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {announcement}
+        </span>
       </div>
     </div>
   )
