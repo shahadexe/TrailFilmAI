@@ -7,7 +7,7 @@ import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: { message?: string }
+  searchParams?: { message?: string | string[] }
 }) {
   const supabase = await createClient()
   const {
@@ -85,7 +85,7 @@ export default async function LoginPage({
         <div className="flex flex-col gap-8">
           <AuthWordmark />
 
-          {searchParams?.message === 'private' && (
+          {!Array.isArray(searchParams?.message) && searchParams?.message === 'private' && (
             <p
               role="status"
               className="mt-4 mb-2 rounded-lg px-4 py-3 font-sans text-sm text-parchment-400 leading-relaxed"

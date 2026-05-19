@@ -59,6 +59,7 @@ export async function POST(
     .from('trips')
     .update({ is_public })
     .eq('id', tripId)
+    .eq('user_id', user.id)
 
   if (error) {
     return jsonResponse({ error: 'Could not update visibility' }, 500)

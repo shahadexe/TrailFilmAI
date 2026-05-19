@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Fraunces, Inter } from 'next/font/google'
 import '../globals.css'
 
@@ -15,12 +16,10 @@ const inter = Inter({
   weight: ['400', '500', '600'],
 })
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${fraunces.variable} ${inter.variable} bg-ink text-ink-50 font-sans antialiased`}>
-        {children}
-      </body>
-    </html>
+    <div className={`${fraunces.variable} ${inter.variable}`}>
+      {children}
+    </div>
   )
 }

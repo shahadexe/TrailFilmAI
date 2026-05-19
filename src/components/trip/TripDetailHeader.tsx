@@ -61,9 +61,13 @@ export function TripDetailHeader({ trip }: { trip: Trip }) {
   }
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(window.location.origin + '/t/' + trip.id)
-    setCopyState('copied')
-    setTimeout(() => setCopyState('idle'), 2000)
+    try {
+      await navigator.clipboard.writeText(window.location.origin + '/t/' + trip.id)
+      setCopyState('copied')
+      setTimeout(() => setCopyState('idle'), 2000)
+    } catch {
+      setVisibilityError('Could not copy link. Please copy the URL manually.')
+    }
   }
 
   return (
