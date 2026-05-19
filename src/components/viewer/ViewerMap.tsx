@@ -105,6 +105,10 @@ export function ViewerMap({ chapterCoords, activeChapterIndex }: ViewerMapProps)
     }
 
     return () => {
+      // Cancel pending style.load listener BEFORE removing markers/layers
+      // so the callback cannot fire after cleanup (prevents duplicate markers).
+      map.current?.off('style.load', addMarkersAndPath)
+
       // Remove markers
       markers.forEach((m) => m.remove())
 
