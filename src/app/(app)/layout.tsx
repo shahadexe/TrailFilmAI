@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { AppNav } from '@/components/layout/AppNav'
+import { AppNavWrapper } from '@/components/layout/AppNavWrapper'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-ink text-ink-50">
-      <AppNav userEmail={user.email ?? ''} />
+      <AppNavWrapper userEmail={user.email ?? ''} />
       <main>{children}</main>
     </div>
   )
