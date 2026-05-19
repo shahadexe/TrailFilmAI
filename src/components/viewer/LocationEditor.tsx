@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { MapPin, Check, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { MapPin, Check, Loader2, ChevronDown, ChevronUp, Search, X } from 'lucide-react'
+import { useMapsLibrary } from '@vis.gl/react-google-maps'
 import type { StoryChapter } from '@/types/database'
 import type { ChapterCoord } from './ViewerMap'
 
@@ -17,18 +18,93 @@ interface ChapterLocationState {
 interface LocationEditorProps {
   tripId: string
   chapters: StoryChapter[]
-  /** Existing coords — chapters with GPS already have entries here */
   existingCoords: ChapterCoord[]
-  onPinPlacingChange: (chapterIndex: number | undefined) => void
-  /** Called after a location is successfully saved so the parent can refresh coords */
   onLocationSaved: (chapterIndex: number, lat: number, lng: number, label: string) => void
 }
+
+// ─── Place search input (one per chapter) ──────────────────────────────────────
+
+interface PlaceSearchProps {
+  chapterId: string
+  initialValue: string
+  onPlaceSelected: (name: string, lat: number, lng: number) => void
+  onClear: () => void
+  hasPendingPin: boolean
+}
+
+function PlaceSearch({ chapterId, initialValue, onPlaceSelected, onClear, hasPendingPin }: PlaceSearchProps) {
+  const placesLib = useMapsLibrary('places')
+  const inputRef = useRef<HTMLInputElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const autocompleteRef = useRef<any>(null)
+  const [inputValue, setInputValue] = useState(initialValue)
+
+  useEffect(() => {
+    if (!placesLib || !inputRef.current || autocompleteRef.current) return
+
+    const ac = new placesLib.Autocomplete(inputRef.current, {
+      fields: ['geometry', 'name', 'formatted_address'],
+    })
+
+    ac.addListener('place_changed', () => {
+      const place = ac.getPlace()
+      const lat = place.geometry?.location?.lat()
+      const lng = place.geometry?.location?.lng()
+      if (lat == null || lng == null) return
+
+      const label = place.name ?? place.formatted_address ?? inputRef.current?.value ?? ''
+      setInputValue(label)
+      onPlaceSelected(label, lat, lng)
+    })
+
+    autocompleteRef.current = ac
+  }, [placesLib, onPlaceSelected])
+
+  function handleClear() {
+    setInputValue('')
+    onClear()
+    inputRef.current?.focus()
+  }
+
+  return (
+    <div className="relative flex-1 min-w-0">
+      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-parchment-600 pointer-events-none" aria-hidden />
+      <input
+        ref={inputRef}
+        id={`place-search-${chapterId}`}
+        type="text"
+        placeholder="Search for a place…"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        className={[
+          'w-full rounded-md bg-ink border px-3 py-1.5 pl-8 font-sans text-[13px] text-parchment-200',
+          'placeholder:text-parchment-600 focus:outline-none transition-colors',
+          hasPendingPin
+            ? 'border-amber-accent/50 bg-amber-accent/05'
+            : 'border-white/10 focus:border-amber-accent/60',
+        ].join(' ')}
+        autoComplete="off"
+      />
+      {(inputValue || hasPendingPin) && (
+        <button
+          type="button"
+          onClick={handleClear}
+          aria-label="Clear location"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-parchment-600 hover:text-parchment-300 transition-colors"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ─── Main editor ───────────────────────────────────────────────────────────────
 
 export function LocationEditor({
   tripId,
   chapters,
   existingCoords,
-  onPinPlacingChange,
   onLocationSaved,
 }: LocationEditorProps) {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -61,10 +137,16 @@ export function LocationEditor({
     []
   )
 
-  // Called by parent when user clicks on map
-  const handlePinPlaced = useCallback(
-    (chapterId: string, lat: number, lng: number) => {
-      setField(chapterId, { pendingLat: lat, pendingLng: lng })
+  const handlePlaceSelected = useCallback(
+    (chapterId: string, name: string, lat: number, lng: number) => {
+      setField(chapterId, { locationName: name, pendingLat: lat, pendingLng: lng, error: null })
+    },
+    [setField]
+  )
+
+  const handleClear = useCallback(
+    (chapterId: string) => {
+      setField(chapterId, { locationName: '', pendingLat: null, pendingLng: null, error: null })
     },
     [setField]
   )
@@ -74,13 +156,12 @@ export function LocationEditor({
       const s = states[chapter.id]
       if (!s || s.saving) return
 
-      const trimmedName = s.locationName.trim()
-      if (!trimmedName) {
-        setField(chapter.id, { error: 'Enter a place name first.' })
+      if (!s.locationName.trim()) {
+        setField(chapter.id, { error: 'Search and select a place first.' })
         return
       }
       if (s.pendingLat === null || s.pendingLng === null) {
-        setField(chapter.id, { error: 'Click the map to place a pin first.' })
+        setField(chapter.id, { error: 'Select a place from the dropdown to get coordinates.' })
         return
       }
 
@@ -93,7 +174,7 @@ export function LocationEditor({
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              location_name: trimmedName,
+              location_name: s.locationName.trim(),
               lat: s.pendingLat,
               lng: s.pendingLng,
             }),
@@ -106,10 +187,8 @@ export function LocationEditor({
         }
 
         setField(chapter.id, { saving: false, saved: true, error: null })
-        onLocationSaved(chapter.chapter_index, s.pendingLat, s.pendingLng, trimmedName)
-        onPinPlacingChange(undefined)
+        onLocationSaved(chapter.chapter_index, s.pendingLat, s.pendingLng, s.locationName.trim())
 
-        // Reset "saved" badge after 3 s
         setTimeout(() => setField(chapter.id, { saved: false }), 3000)
       } catch (err) {
         setField(chapter.id, {
@@ -118,7 +197,7 @@ export function LocationEditor({
         })
       }
     },
-    [states, tripId, setField, onLocationSaved, onPinPlacingChange]
+    [states, tripId, setField, onLocationSaved]
   )
 
   if (chaptersWithoutGps.length === 0) return null
@@ -159,32 +238,17 @@ export function LocationEditor({
                   Chapter {chapter.chapter_index + 1} — {chapter.title}
                 </p>
 
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Place name (e.g. Kyoto, Japan)"
-                    value={s.locationName}
-                    onChange={(e) => setField(chapter.id, { locationName: e.target.value, error: null })}
-                    className="flex-1 min-w-0 rounded-md bg-ink border border-white/10 px-3 py-1.5 font-sans text-[13px] text-parchment-200 placeholder:text-parchment-600 focus:outline-none focus:border-amber-accent/60"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => onPinPlacingChange(chapter.chapter_index)}
-                    className={[
-                      'flex-shrink-0 flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-[12px] font-medium transition-colors',
-                      hasPendingPin
-                        ? 'bg-amber-accent/15 text-amber-accent border border-amber-accent/40'
-                        : 'bg-white/06 text-parchment-400 border border-white/10 hover:border-amber-accent/40 hover:text-amber-accent',
-                    ].join(' ')}
-                  >
-                    <MapPin className="h-3 w-3" aria-hidden />
-                    {hasPendingPin ? 'Pinned' : 'Pin'}
-                  </button>
-                </div>
+                <PlaceSearch
+                  chapterId={chapter.id}
+                  initialValue={s.locationName}
+                  onPlaceSelected={(name, lat, lng) => handlePlaceSelected(chapter.id, name, lat, lng)}
+                  onClear={() => handleClear(chapter.id)}
+                  hasPendingPin={hasPendingPin}
+                />
 
                 {hasPendingPin && (
-                  <p className="font-sans text-[11px] text-parchment-600">
+                  <p className="font-sans text-[11px] text-parchment-600 flex items-center gap-1.5">
+                    <MapPin className="h-3 w-3 text-amber-accent/70" aria-hidden />
                     {s.pendingLat!.toFixed(4)}, {s.pendingLng!.toFixed(4)}
                   </p>
                 )}
@@ -195,9 +259,9 @@ export function LocationEditor({
 
                 <button
                   type="button"
-                  disabled={s.saving || s.saved}
+                  disabled={s.saving || s.saved || !hasPendingPin}
                   onClick={() => handleSave(chapter)}
-                  className="self-end flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-[12px] font-medium bg-amber-accent text-ink disabled:opacity-50 hover:bg-[#FFC881] transition-colors"
+                  className="self-end flex items-center gap-1.5 rounded-md px-3 py-1.5 font-sans text-[12px] font-medium bg-amber-accent text-ink disabled:opacity-40 hover:bg-[#FFC881] transition-colors"
                 >
                   {s.saving ? (
                     <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
@@ -215,5 +279,4 @@ export function LocationEditor({
   )
 }
 
-// Expose pin-placed handler type so CinematicViewer can bridge map clicks → editor
 export type { ChapterLocationState }

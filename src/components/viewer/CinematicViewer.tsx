@@ -12,7 +12,6 @@ import type { StoryChapter } from '@/types/database'
 import type { ChapterCoord } from '@/components/viewer/ViewerMap'
 import type { PhotoForDisplay } from '@/components/trip/TripPhotoGrid'
 
-// Dynamic import — @vis.gl/react-google-maps uses browser APIs; cannot be server-rendered
 const ViewerMap = dynamic(
   () => import('@/components/viewer/ViewerMap'),
   { ssr: false }
@@ -20,13 +19,10 @@ const ViewerMap = dynamic(
 
 interface CinematicViewerProps {
   chapters: StoryChapter[]
-  /** First-photo URL keyed by chapter.id (for backdrop) */
   photoUrlByChapter: Record<string, string>
-  /** All photo URLs keyed by chapter.id (for thumbnail strip) */
   allPhotoUrlsByChapter: Record<string, string[]>
   chapterCoords: ChapterCoord[]
   showNav?: boolean
-  /** Required for upload drawer and location editing (owner-only) */
   tripId?: string
   userId?: string
   allPhotos?: PhotoForDisplay[]
@@ -44,24 +40,10 @@ export function CinematicViewer({
 }: CinematicViewerProps) {
   const [activeChapterIndex, setActiveChapterIndex] = useState<number | undefined>(undefined)
   const [coords, setCoords] = useState<ChapterCoord[]>(initialCoords)
-  const [pinPlacingForChapter, setPinPlacingForChapter] = useState<number | undefined>(undefined)
 
   const handleChapterInView = useCallback((idx: number) => {
     setActiveChapterIndex(idx)
   }, [])
-
-  const handlePinPlaced = useCallback(
-    (chapterIndex: number, lat: number, lng: number) => {
-      // Optimistically update coords so the dot appears immediately while user fills the name
-      setCoords((prev) => {
-        const filtered = prev.filter((c) => c.chapterIndex !== chapterIndex)
-        return [...filtered, { chapterIndex, lat, lng }].sort(
-          (a, b) => a.chapterIndex - b.chapterIndex
-        )
-      })
-    },
-    []
-  )
 
   const handleLocationSaved = useCallback(
     (chapterIndex: number, lat: number, lng: number, label: string) => {
@@ -71,7 +53,6 @@ export function CinematicViewer({
           (a, b) => a.chapterIndex - b.chapterIndex
         )
       })
-      setPinPlacingForChapter(undefined)
     },
     []
   )
@@ -83,7 +64,6 @@ export function CinematicViewer({
       {showNav !== false && <ViewerNav />}
       <ScrollProgress />
 
-      {/* Story content — offset from fixed map panel on desktop (38vw right sidebar) and mobile (40dvh bottom sheet) */}
       <div className="mr-0 md:mr-[38vw] pb-[40dvh] md:pb-0">
         {chapters.map((chapter, i) => {
           const photoUrl = photoUrlByChapter[chapter.id] ?? ''
@@ -100,15 +80,12 @@ export function CinematicViewer({
           )
         })}
 
-        {/* All photos + upload section — owner only */}
         {isOwnerView && (
           <AllPhotosSection
             tripId={tripId!}
             userId={userId!}
             photos={allPhotos}
-            onPhotosAdded={() => {
-              // Parent can listen via a prop if regeneration triggering is needed
-            }}
+            onPhotosAdded={() => {}}
           />
         )}
       </div>
@@ -117,30 +94,22 @@ export function CinematicViewer({
         <ViewerMap
           chapterCoords={coords}
           activeChapterIndex={activeChapterIndex}
-          pinPlacingForChapter={pinPlacingForChapter}
-          onPinPlaced={handlePinPlaced}
-          onCancelPinPlacing={() => setPinPlacingForChapter(undefined)}
         />
-      </APIProvider>
 
-      {/* LocationEditor — fixed overlay that matches the map panel geometry so it sits over the map
-          without being a child of the dynamic ViewerMap (which would cause remount on state change) */}
-      {isOwnerView && (
-        <div className={[
-          // Mobile: above the bottom sheet (40dvh tall), sits at bottom of screen above it
-          'fixed bottom-[40dvh] left-0 right-0 z-30',
-          // Desktop: right sidebar, bottom portion
-          'md:bottom-0 md:left-auto md:right-0 md:w-[38vw]',
-        ].join(' ')}>
-          <LocationEditor
-            tripId={tripId!}
-            chapters={chapters}
-            existingCoords={coords}
-            onPinPlacingChange={setPinPlacingForChapter}
-            onLocationSaved={handleLocationSaved}
-          />
-        </div>
-      )}
+        {isOwnerView && (
+          <div className={[
+            'fixed bottom-[40dvh] left-0 right-0 z-30',
+            'md:bottom-0 md:left-auto md:right-0 md:w-[38vw]',
+          ].join(' ')}>
+            <LocationEditor
+              tripId={tripId!}
+              chapters={chapters}
+              existingCoords={coords}
+              onLocationSaved={handleLocationSaved}
+            />
+          </div>
+        )}
+      </APIProvider>
     </>
   )
 }
