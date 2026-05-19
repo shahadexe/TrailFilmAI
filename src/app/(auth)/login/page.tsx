@@ -4,7 +4,11 @@ import { AuthWordmark } from '@/components/auth/AuthWordmark'
 import { MagicLinkForm } from '@/components/auth/MagicLinkForm'
 import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams?: { message?: string }
+}) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -80,6 +84,19 @@ export default async function LoginPage() {
 
         <div className="flex flex-col gap-8">
           <AuthWordmark />
+
+          {searchParams?.message === 'private' && (
+            <p
+              role="status"
+              className="mt-4 mb-2 rounded-lg px-4 py-3 font-sans text-sm text-parchment-400 leading-relaxed"
+              style={{
+                background: 'rgba(229,166,99,0.06)',
+                border: '1px solid rgba(229,166,99,0.15)',
+              }}
+            >
+              This story is private. Sign in to view your own trips.
+            </p>
+          )}
 
           <MagicLinkForm />
 
