@@ -2,6 +2,10 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { TripDetailHeader } from '@/components/trip/TripDetailHeader'
 import { TripPhotoGrid, type PhotoForDisplay } from '@/components/trip/TripPhotoGrid'
+import { StorySection } from '@/components/trip/StorySection'
+import { DraftStoryCTA } from '@/components/trip/DraftStoryCTA'
+import { GeneratingStoryState } from '@/components/trip/GeneratingStoryState'
+import type { StoryChapter } from '@/types/database'
 
 export default async function TripDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -42,12 +46,35 @@ export default async function TripDetailPage({ params }: { params: { id: string 
     hasGps: p.latitude !== null && p.longitude !== null,
   }))
 
+  let chapters: StoryChapter[] = []
+  if (trip.generation_status === 'completed') {
+    const { data: chapterRows } = await supabase
+      .from('story_chapters')
+      .select('*')
+      .eq('trip_id', params.id)
+      .order('chapter_index', { ascending: true })
+
+    chapters = chapterRows ?? []
+  }
+
   return (
     <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 pt-8 pb-16">
       <TripDetailHeader trip={trip} />
 
       {photos.length > 0 ? (
-        <TripPhotoGrid photos={photos} />
+        <>
+          <TripPhotoGrid photos={photos} />
+
+          {trip.generation_status === 'completed' && chapters.length > 0 && (
+            <StorySection chapters={chapters} />
+          )}
+
+          {trip.generation_status === 'generating' && <GeneratingStoryState />}
+
+          {(trip.generation_status === 'draft' || trip.generation_status === 'failed') && (
+            <DraftStoryCTA tripId={trip.id} />
+          )}
+        </>
       ) : (
         <p className="mt-12 font-sans text-base text-parchment-400">No photos yet.</p>
       )}
