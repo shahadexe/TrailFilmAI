@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { APIProvider } from '@vis.gl/react-google-maps'
 import { ViewerNav } from '@/components/viewer/ViewerNav'
 import { ScrollProgress } from '@/components/viewer/ScrollProgress'
 import { ChapterSection } from '@/components/viewer/ChapterSection'
@@ -90,26 +89,24 @@ export function CinematicViewer({
         )}
       </div>
 
-      <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-        <ViewerMap
-          chapterCoords={coords}
-          activeChapterIndex={activeChapterIndex}
-        />
+      <ViewerMap
+        chapterCoords={coords}
+        activeChapterIndex={activeChapterIndex}
+      />
 
-        {isOwnerView && (
-          <div className={[
-            'fixed bottom-[40dvh] left-0 right-0 z-30',
-            'md:bottom-0 md:left-auto md:right-0 md:w-[38vw]',
-          ].join(' ')}>
-            <LocationEditor
-              tripId={tripId!}
-              chapters={chapters}
-              existingCoords={coords}
-              onLocationSaved={handleLocationSaved}
-            />
-          </div>
-        )}
-      </APIProvider>
+      {isOwnerView && (
+        <div className={[
+          'fixed bottom-[40dvh] left-0 right-0 z-30',
+          'md:bottom-0 md:left-auto md:right-0 md:w-[38vw]',
+        ].join(' ')}>
+          <LocationEditor
+            tripId={tripId!}
+            chapters={chapters}
+            existingCoords={coords}
+            onLocationSaved={handleLocationSaved}
+          />
+        </div>
+      )}
     </>
   )
 }

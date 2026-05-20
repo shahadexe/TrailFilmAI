@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { MapPin, Check, Loader2, ChevronDown, ChevronUp, Search, X } from 'lucide-react'
-import { useMapsLibrary } from '@vis.gl/react-google-maps'
 import type { StoryChapter } from '@/types/database'
 import type { ChapterCoord } from './ViewerMap'
 
@@ -22,7 +21,13 @@ interface LocationEditorProps {
   onLocationSaved: (chapterIndex: number, lat: number, lng: number, label: string) => void
 }
 
-// ─── Place search input (one per chapter) ──────────────────────────────────────
+// ─── Mapbox Geocoding search input ────────────────────────────────────────────
+
+interface Suggestion {
+  id: string
+  place_name: string
+  center: [number, number]
+}
 
 interface PlaceSearchProps {
   chapterId: string
@@ -33,49 +38,75 @@ interface PlaceSearchProps {
 }
 
 function PlaceSearch({ chapterId, initialValue, onPlaceSelected, onClear, hasPendingPin }: PlaceSearchProps) {
-  const placesLib = useMapsLibrary('places')
-  const inputRef = useRef<HTMLInputElement>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const autocompleteRef = useRef<any>(null)
   const [inputValue, setInputValue] = useState(initialValue)
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const [open, setOpen] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
+  // Close dropdown when clicking outside
   useEffect(() => {
-    if (!placesLib || !inputRef.current || autocompleteRef.current) return
+    function handleClick(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
-    const ac = new placesLib.Autocomplete(inputRef.current, {
-      fields: ['geometry', 'name', 'formatted_address'],
-    })
+  async function fetchSuggestions(query: string) {
+    if (!query.trim()) { setSuggestions([]); setOpen(false); return }
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&autocomplete=true&limit=5`
+    try {
+      const res = await fetch(url)
+      const data = await res.json()
+      const features: Suggestion[] = (data.features ?? []).map((f: { id: string; place_name: string; center: [number, number] }) => ({
+        id: f.id,
+        place_name: f.place_name,
+        center: f.center,
+      }))
+      setSuggestions(features)
+      setOpen(features.length > 0)
+    } catch {
+      setSuggestions([])
+    }
+  }
 
-    ac.addListener('place_changed', () => {
-      const place = ac.getPlace()
-      const lat = place.geometry?.location?.lat()
-      const lng = place.geometry?.location?.lng()
-      if (lat == null || lng == null) return
+  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value
+    setInputValue(val)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => fetchSuggestions(val), 300)
+  }
 
-      const label = place.name ?? place.formatted_address ?? inputRef.current?.value ?? ''
-      setInputValue(label)
-      onPlaceSelected(label, lat, lng)
-    })
-
-    autocompleteRef.current = ac
-  }, [placesLib, onPlaceSelected])
+  function handleSelect(s: Suggestion) {
+    setInputValue(s.place_name)
+    setSuggestions([])
+    setOpen(false)
+    // Mapbox center is [lng, lat]
+    onPlaceSelected(s.place_name, s.center[1], s.center[0])
+  }
 
   function handleClear() {
     setInputValue('')
+    setSuggestions([])
+    setOpen(false)
     onClear()
-    inputRef.current?.focus()
   }
 
   return (
-    <div className="relative flex-1 min-w-0">
-      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-parchment-600 pointer-events-none" aria-hidden />
+    <div ref={wrapperRef} className="relative flex-1 min-w-0">
+      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-parchment-600 pointer-events-none z-10" aria-hidden />
       <input
-        ref={inputRef}
         id={`place-search-${chapterId}`}
         type="text"
         placeholder="Search for a place…"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={handleInput}
+        onFocus={() => suggestions.length > 0 && setOpen(true)}
+        autoComplete="off"
         className={[
           'w-full rounded-md bg-ink border px-3 py-1.5 pl-8 font-sans text-[13px] text-parchment-200',
           'placeholder:text-parchment-600 focus:outline-none transition-colors',
@@ -83,17 +114,33 @@ function PlaceSearch({ chapterId, initialValue, onPlaceSelected, onClear, hasPen
             ? 'border-amber-accent/50 bg-amber-accent/05'
             : 'border-white/10 focus:border-amber-accent/60',
         ].join(' ')}
-        autoComplete="off"
       />
       {(inputValue || hasPendingPin) && (
         <button
           type="button"
           onClick={handleClear}
           aria-label="Clear location"
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-parchment-600 hover:text-parchment-300 transition-colors"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-parchment-600 hover:text-parchment-300 transition-colors z-10"
         >
           <X className="h-3.5 w-3.5" />
         </button>
+      )}
+
+      {open && suggestions.length > 0 && (
+        <ul className="absolute top-full left-0 right-0 mt-1 z-50 rounded-md border border-white/10 bg-[#1a1a1a] shadow-xl overflow-hidden">
+          {suggestions.map((s) => (
+            <li key={s.id}>
+              <button
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); handleSelect(s) }}
+                className="w-full text-left px-3 py-2 font-sans text-[12px] text-parchment-300 hover:bg-white/06 hover:text-parchment-100 transition-colors flex items-center gap-2"
+              >
+                <MapPin className="h-3 w-3 text-amber-accent/60 flex-shrink-0" aria-hidden />
+                <span className="truncate">{s.place_name}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )
@@ -188,7 +235,6 @@ export function LocationEditor({
 
         setField(chapter.id, { saving: false, saved: true, error: null })
         onLocationSaved(chapter.chapter_index, s.pendingLat, s.pendingLng, s.locationName.trim())
-
         setTimeout(() => setField(chapter.id, { saved: false }), 3000)
       } catch (err) {
         setField(chapter.id, {
