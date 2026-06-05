@@ -1,5 +1,6 @@
 export type StoryTone = 'cinematic' | 'poetic' | 'adventurous' | 'documentary'
 export type GenerationStatus = 'draft' | 'generating' | 'completed' | 'failed'
+export type DocumentaryStatus = 'processing' | 'completed' | 'failed'
 
 export interface Trip {
   id: string
@@ -12,6 +13,21 @@ export interface Trip {
   cover_photo_id: string | null
   is_public: boolean
   generation_status: GenerationStatus
+  iso_country_code: string | null
+  latest_documentary_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Documentary {
+  id: string
+  trip_id: string
+  user_id: string
+  status: DocumentaryStatus
+  scene_count: number | null
+  video_urls: string[]
+  scene_titles: string[] | null
+  error_message: string | null
   created_at: string
   updated_at: string
 }

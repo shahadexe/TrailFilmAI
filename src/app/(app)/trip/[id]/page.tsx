@@ -6,6 +6,8 @@ import { StorySection } from '@/components/trip/StorySection'
 import { DraftStoryCTA } from '@/components/trip/DraftStoryCTA'
 import { GeneratingStoryState } from '@/components/trip/GeneratingStoryState'
 import { CinematicViewer } from '@/components/viewer/CinematicViewer'
+import { DocumentarySection } from '@/components/documentary/DocumentarySection'
+import { ShareMapButton } from '@/components/trip/ShareMapButton'
 import type { StoryChapter } from '@/types/database'
 import type { ChapterCoord } from '@/components/viewer/ViewerMap'
 
@@ -24,7 +26,7 @@ export default async function TripDetailPage({ params }: { params: { id: string 
   // Collapsing wrong-id and wrong-owner into the same notFound() prevents information disclosure.
   const { data: trip } = await supabase
     .from('trips')
-    .select('*')
+    .select('*, latest_documentary_id')
     .eq('id', params.id)
     .eq('user_id', user!.id)
     .single()
@@ -137,6 +139,9 @@ export default async function TripDetailPage({ params }: { params: { id: string 
         tripId={trip.id}
         userId={user.id}
         allPhotos={photos}
+        tripTitle={trip.title}
+        isPublic={trip.is_public}
+        existingDocumentaryId={trip.latest_documentary_id ?? null}
       />
     )
   }
@@ -158,6 +163,19 @@ export default async function TripDetailPage({ params }: { params: { id: string 
 
           {(trip.generation_status === 'draft' || trip.generation_status === 'failed') && (
             <DraftStoryCTA tripId={trip.id} />
+          )}
+
+          {/* AI Documentary — available whenever photos exist */}
+          <DocumentarySection
+            tripId={trip.id}
+            tripTitle={trip.title}
+            photoCount={photos.length}
+            existingDocumentaryId={trip.latest_documentary_id ?? null}
+          />
+
+          {/* Share Map button — available when trip is public and has GPS coords */}
+          {trip.is_public && chapterCoords.length > 0 && (
+            <ShareMapButton tripId={trip.id} />
           )}
         </>
       ) : (

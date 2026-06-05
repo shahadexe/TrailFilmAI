@@ -7,6 +7,8 @@ import { ScrollProgress } from '@/components/viewer/ScrollProgress'
 import { ChapterSection } from '@/components/viewer/ChapterSection'
 import { LocationEditor } from '@/components/viewer/LocationEditor'
 import { AllPhotosSection } from '@/components/viewer/AllPhotosSection'
+import { DocumentarySection } from '@/components/documentary/DocumentarySection'
+import { ShareMapButton } from '@/components/trip/ShareMapButton'
 import type { StoryChapter } from '@/types/database'
 import type { ChapterCoord } from '@/components/viewer/ViewerMap'
 import type { PhotoForDisplay } from '@/components/trip/TripPhotoGrid'
@@ -25,6 +27,9 @@ interface CinematicViewerProps {
   tripId?: string
   userId?: string
   allPhotos?: PhotoForDisplay[]
+  tripTitle?: string
+  isPublic?: boolean
+  existingDocumentaryId?: string | null
 }
 
 export function CinematicViewer({
@@ -36,6 +41,9 @@ export function CinematicViewer({
   tripId,
   userId,
   allPhotos = [],
+  tripTitle = '',
+  isPublic = false,
+  existingDocumentaryId = null,
 }: CinematicViewerProps) {
   const [activeChapterIndex, setActiveChapterIndex] = useState<number | undefined>(undefined)
   const [coords, setCoords] = useState<ChapterCoord[]>(initialCoords)
@@ -86,6 +94,22 @@ export function CinematicViewer({
             photos={allPhotos}
             onPhotosAdded={() => {}}
           />
+        )}
+
+        {isOwnerView && (
+          <div className="px-6 pb-16 max-w-2xl">
+            <DocumentarySection
+              tripId={tripId!}
+              tripTitle={tripTitle}
+              photoCount={allPhotos.length}
+              existingDocumentaryId={existingDocumentaryId}
+            />
+            {isPublic && coords.length > 0 && (
+              <div className="mt-4">
+                <ShareMapButton tripId={tripId!} />
+              </div>
+            )}
+          </div>
         )}
       </div>
 
